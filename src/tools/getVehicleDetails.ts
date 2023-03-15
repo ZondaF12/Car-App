@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+import { DVLA_API } from "@env";
+
 export const getVehicleDetails = async (numberPlate: string) => {
     const [vehicleDetials, setVehicleDetails] = useState<any | null>(null);
 
@@ -11,7 +13,7 @@ export const getVehicleDetails = async (numberPlate: string) => {
                 method: "post",
                 url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
                 headers: {
-                    "x-api-key": "7MS8WEBQdy1AlK6MYbslb8HUTZCnK8pR9FHNilBz",
+                    "x-api-key": `${DVLA_API}`,
                     "Content-Type": "application/json",
                 },
                 data: data,
