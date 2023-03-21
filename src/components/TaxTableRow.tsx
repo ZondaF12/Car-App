@@ -50,7 +50,7 @@ const TaxTableRow = ({ emissions, band, isRating }: Props) => {
         <View
             className={`items-center justify-center flex-row ${
                 isRating
-                    ? `bg-[#091821] ${colours[band].borderColor} border-l-4`
+                    ? `bg-[#33343b] ${colours[band].borderColor} border-l-4`
                     : ""
             } py-0.5`}
         >

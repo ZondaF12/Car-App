@@ -9,21 +9,6 @@ export type NavigationProp = NativeStackNavigationProp<
     "VehicleTax"
 >;
 
-const taxPriceNew: any = {
-    0: "£0",
-    50: "£10",
-    75: "£25",
-    90: "£120",
-    100: "£150",
-    110: "£170",
-    130: "£190",
-    150: "£230",
-    170: "£585",
-    190: "£945",
-    225: "£1420",
-    1000: "£2365",
-};
-
 const taxPriceOld: any = {
     100: "£0",
     110: "£20",
@@ -74,7 +59,7 @@ const VehicleTaxScreen = ({ route }: any) => {
             let taxPricing;
             if (registeredDate.getTime() < cutOffDate.getTime()) {
                 for (let key of Object.keys(taxPriceOld)) {
-                    if (emission < +key) {
+                    if (emission <= +key) {
                         taxPricing = await Promise.resolve(taxPriceOld[key]);
                         break;
                     }
@@ -93,7 +78,7 @@ const VehicleTaxScreen = ({ route }: any) => {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-[#16242c] items-center w-full">
+        <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
             <View className="my-10">
                 <Text className="items-center justify-center text-white text-center text-2xl font-bold">
                     Tax Details
@@ -123,11 +108,11 @@ const VehicleTaxScreen = ({ route }: any) => {
                     <Text className="text-white text-base">{taxPrice}*</Text>
                 </View>
             </View>
-            <View className="w-[90%] bg-[#091821] p-2 mt-4">
+            <View className="w-[90%] bg-[#33343b] p-2 mt-4">
                 <Text className="text-white font-bold">CO2 Emissions</Text>
             </View>
             <TaxTable emissions={co2Emissions} />
-            <View className="flex-row justify-between w-[90%] px-4 py-2 bg-[#091821]">
+            <View className="flex-row justify-between w-[90%] px-4 py-2 bg-[#33343b]">
                 <Text className="text-white text-base">Co2 Emissions</Text>
                 <Text className="text-white text-base">
                     {co2Emissions} g/km

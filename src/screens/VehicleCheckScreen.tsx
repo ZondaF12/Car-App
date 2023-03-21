@@ -28,6 +28,8 @@ export type NavigationProp = NativeStackNavigationProp<
     "VehicleCheck"
 >;
 
+/* Add https://reactnative.dev/docs/refreshcontrol */
+
 const VehicleCheckScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -50,8 +52,8 @@ const VehicleCheckScreen = ({ route }: any) => {
 
     if (!vehicleDetails?._j) {
         return (
-            <View className="bg-[#16242c] flex-1 p-10 items-center justify-center">
-                <ActivityIndicator size="large" color="#64ffda" />
+            <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
+                <ActivityIndicator size="large" color="#6c5dd2" />
             </View>
         );
     }
@@ -69,10 +71,10 @@ const VehicleCheckScreen = ({ route }: any) => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-[#16242c]">
+        <SafeAreaView className="flex-1 bg-[#1e2128]">
             <View className="items-center h-[86%]">
-                <View className="bg-white w-52 items-center justify-center h-12 rounded-lg top-3 z-20">
-                    <Text className="text-2xl font-bold">
+                <View className="bg-white w-52 items-center justify-center h-12 rounded-lg top-3 z-20 shadow-2xl">
+                    <Text className="text-2xl font-bold uppercase">
                         {route.params.numberPlate}
                     </Text>
                 </View>
@@ -105,7 +107,8 @@ const VehicleCheckScreen = ({ route }: any) => {
                     <ActionRow
                         title="Tax"
                         isValid={
-                            vehicleDetails._j.taxStatus === "Taxed"
+                            vehicleDetails._j.taxStatus === "Taxed" ||
+                            vehicleDetails._j.taxStatus === "SORN"
                                 ? true
                                 : false
                         }
@@ -127,9 +130,9 @@ const VehicleCheckScreen = ({ route }: any) => {
                         api={vehicleDetails._j}
                     />
 
-                    <View className="mt-5 rounded-lg w-80 border-2 border-[#091821]">
+                    <View className="mt-5 rounded-lg w-full border-2 border-[#33343b]">
                         <View
-                            className={`rounded-t-lg h-12 items-center flex-row justify-center px-8 border-b-2 border-[#091821]`}
+                            className={`rounded-t-lg h-12 items-center flex-row justify-center px-8 border-b-2 border-[#33343b]`}
                         >
                             <Text className="text-white text-lg font-bold">
                                 Basic Vehicle Details

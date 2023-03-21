@@ -12,7 +12,7 @@ const TableFields = ({ title, data, lastRow }: Props) => {
         <View
             className={`rounded-t-lg h-12 items-center flex-row justify-between px-8 ${
                 lastRow ? "" : "border-b-2"
-            } border-[#3d4850]`}
+            } border-[#33343b]`}
         >
             <Text className="text-white text-sm">{title}</Text>
             <Text className="text-white text-base font-bold">{data}</Text>

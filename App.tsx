@@ -8,8 +8,20 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import VehicleCheckScreen from "./src/screens/VehicleCheckScreen";
 import VehicleTaxScreen from "./src/screens/VehicleTaxScreen";
 import VehicleMotScreen from "./src/screens/VehicleMotScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import { Amplify, Auth, Hub } from "aws-amplify";
+import config from "./src/aws-exports";
+import ConfirmEmailScreen from "./src/screens/ConfirmEmailScreen";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+
+Amplify.configure(config);
 
 export type RootStackParamList = {
+    Login: undefined;
+    Register: undefined;
+    ConfirmEmail: any;
     Vehicles: undefined;
     Search: undefined;
     Account: undefined;
@@ -24,16 +36,17 @@ const Tabs = () => {
     return (
         <Tab.Navigator
             screenOptions={{
-                tabBarActiveTintColor: "#64ffda",
+                tabBarActiveTintColor: "#6c5dd2",
                 tabBarInactiveTintColor: "#fff",
                 headerShown: false,
                 tabBarStyle: {
                     height: 90,
                     paddingHorizontal: 5,
                     paddingTop: 0,
-                    backgroundColor: "#091821",
+                    backgroundColor: "#1e2128",
                     position: "absolute",
-                    borderTopWidth: 0,
+                    borderTopWidth: 1,
+                    borderTopColor: "#33343b",
                 },
             }}
         >
@@ -77,15 +90,74 @@ const Tabs = () => {
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function App() {
+const App = () => {
+    const [user, setUser] = useState<undefined | null>(undefined);
+
+    const checkUser = async () => {
+        try {
+            const authUser = await Auth.currentAuthenticatedUser({
+                bypassCache: true,
+            });
+            setUser(authUser);
+        } catch (err) {
+            setUser(null);
+        }
+    };
+
+    useEffect(() => {
+        checkUser();
+    }, []);
+
+    useEffect(() => {
+        const listener = (data: any) => {
+            if (
+                data.payload.event === "signIn" ||
+                data.payload.event === "signOut"
+            ) {
+                checkUser();
+            }
+            console.log(data);
+        };
+        return Hub.listen("auth", listener);
+    }, []);
+
+    if (user === undefined) {
+        return (
+            <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
+                <ActivityIndicator size="large" color="#6c5dd2" />
+            </View>
+        );
+    }
+
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen
-                    name="Vehicles"
-                    component={Tabs}
-                    options={{ headerShown: false }}
-                />
+                {user ? (
+                    <Stack.Screen
+                        name="Vehicles"
+                        component={Tabs}
+                        options={{ headerShown: false }}
+                    />
+                ) : (
+                    <>
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Register"
+                            component={RegisterScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="ConfirmEmail"
+                            component={ConfirmEmailScreen}
+                            options={{ headerShown: false }}
+                        />
+                    </>
+                )}
+
                 <Stack.Screen
                     name="Search"
                     component={Tabs}
@@ -114,4 +186,6 @@ export default function App() {
             </Stack.Navigator>
         </NavigationContainer>
     );
-}
+};
+
+export default App;

@@ -1,0 +1,20 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pocketgarage-staging-184216-authRole",
+      "UnauthRoleArn": "arn:aws:iam::356750117515:role/amplify-pocketgarage-staging-184216-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::356750117515:role/amplify-pocketgarage-staging-184216-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-pocketgarage-staging-184216-deployment",
+      "UnauthRoleName": "amplify-pocketgarage-staging-184216-unauthRole",
+      "StackName": "amplify-pocketgarage-staging-184216",
+      "StackId": "arn:aws:cloudformation:eu-west-2:356750117515:stack/amplify-pocketgarage-staging-184216/f009e430-c74e-11ed-b124-02695fea9c10",
+      "AmplifyAppId": "d1suw5wrh85wz0"
+    },
+    "categories": {
+      "auth": {
+        "PocketGarage": {}
+      }
+    }
+  }
+}
