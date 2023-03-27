@@ -1,8 +1,8 @@
 import { View, Text, SafeAreaView, TouchableOpacity } from "react-native";
 import React from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import MotSvgComponent from "../../assets/MotSvg";
+import { RootStackParamList } from "../../../App";
+import MotSvgComponent from "../../../assets/MotSvg";
 import { ScrollView } from "react-native-gesture-handler";
 
 export type NavigationProp = NativeStackNavigationProp<

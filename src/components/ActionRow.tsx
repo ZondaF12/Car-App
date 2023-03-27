@@ -17,11 +17,11 @@ type Props = {
 
 const ActionRow = ({ title, isValid, api }: Props) => {
     const navigation = useNavigation<NavigationProp>();
-    const buttonColor = isValid ? "#fff" : "#fff";
+    const buttonColor = isValid ? "#6c5dd2" : "#ff754c";
 
     return (
         <TouchableOpacity
-            className="flex-row bg-[#6c5dd2] w-full rounded-xl p-2 mt-4 justify-center"
+            className={`flex-row bg-[#33343b] w-full rounded-xl p-2 mt-4 justify-center`}
             onPress={() =>
                 title === "Tax"
                     ? navigation.navigate("VehicleTax", {
@@ -47,7 +47,7 @@ const ActionRow = ({ title, isValid, api }: Props) => {
             </View>
             <Text
                 className={`${
-                    isValid ? "text-[#fff]" : "text-white"
+                    isValid ? "text-[#6c5dd2]" : "text-[#ff754c]"
                 } text-lg uppercase font-bold text-center`}
             >
                 {title}

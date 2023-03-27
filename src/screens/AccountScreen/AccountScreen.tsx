@@ -1,10 +1,9 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React, { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import { Auth } from "aws-amplify";
-import { Ionicons } from "@expo/vector-icons";
-import { Entypo } from "@expo/vector-icons";
-import SettingsButton from "../components/SettingsButton";
+import React, { useEffect, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import SettingsButton from "../../components/SettingsButton";
 
 const AccountScreen = () => {
     const [user, setUser] = useState<undefined | null>(undefined);
@@ -12,9 +11,8 @@ const AccountScreen = () => {
 
     const checkUser = async () => {
         try {
-            const authUser = await Auth.currentAuthenticatedUser({
-                bypassCache: true,
-            });
+            const authUser = await Auth.currentUserInfo();
+            // console.log(authUser);
 
             setUser(authUser);
             setUserName(authUser?.attributes?.name);

@@ -1,17 +1,25 @@
-import { View, Text, SafeAreaView, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import { DataStore } from "@aws-amplify/datastore";
+import "@azure/core-asynciterator-polyfill";
 import { MaterialIcons } from "@expo/vector-icons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
 import { useNavigation } from "@react-navigation/native";
-import AppleLogoSvg from "../../assets/AppleLogoSvg";
-import FacebookLogoSvg from "../../assets/FacebookLogoSvg";
-import GoogleLogoSvg from "../../assets/GoogleLogoSvg";
-import InputField from "../components/InputField";
-import LoginRegisterButton from "../components/LoginRegisterButton";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Auth } from "aws-amplify";
-import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
+import React, { useState } from "react";
+import {
+    Alert,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { RootStackParamList } from "../../../App";
+import AppleLogoSvg from "../../../assets/AppleLogoSvg";
+import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
+import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
+import InputField from "../../components/InputField";
+import LoginRegisterButton from "../../components/LoginRegisterButton";
+import { User } from "../../models";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -23,11 +31,16 @@ const RegisterScreen = () => {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [name, setName] = useState("");
     const [dobLabel, setDobLabel] = useState("");
     const [loading, setLoading] = useState(false);
 
     const registerPressed = async () => {
+        if (password != confirmPassword) {
+            Alert.alert("Passwords do not match");
+            return;
+        }
         setLoading(true);
         try {
             await Auth.signUp({
@@ -39,17 +52,22 @@ const RegisterScreen = () => {
                 },
             });
 
+            const res = await DataStore.save(
+                new User({
+                    name: name,
+                    email: email,
+                    Vehicles: [],
+                    SearchHistories: [],
+                })
+            );
+
+            console.log(res);
+
             navigation.navigate("ConfirmEmail", { email: email });
-        } catch (err) {
-            console.log(err);
+        } catch (err: any) {
+            Alert.alert(err.message);
         }
         setLoading(false);
-    };
-
-    const onGoogleRegisterPressed = async () => {
-        Auth.federatedSignIn({
-            provider: CognitoHostedUIIdentityProvider.Google,
-        });
     };
 
     const showDatePicker = () => {
@@ -144,6 +162,7 @@ const RegisterScreen = () => {
                         />
                     }
                     inputType="password"
+                    setLabel={setConfirmPassword}
                 />
 
                 <View className="flex-row border-[#ccc] border-b pb-2 mb-8">

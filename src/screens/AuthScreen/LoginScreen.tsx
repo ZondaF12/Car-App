@@ -1,22 +1,22 @@
-import {
-    View,
-    Text,
-    SafeAreaView,
-    TouchableOpacity,
-    Alert,
-} from "react-native";
-import React, { useState } from "react";
-import { MaterialIcons } from "@expo/vector-icons";
-import GoogleLogoSvg from "../../assets/GoogleLogoSvg";
-import AppleLogoSvg from "../../assets/AppleLogoSvg";
-import FacebookLogoSvg from "../../assets/FacebookLogoSvg";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import { useNavigation } from "@react-navigation/native";
-import LoginRegisterButton from "../components/LoginRegisterButton";
-import InputField from "../components/InputField";
-import { Auth } from "aws-amplify";
 import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Auth } from "aws-amplify";
+import React, { useState } from "react";
+import {
+    Alert,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { RootStackParamList } from "../../../App";
+import AppleLogoSvg from "../../../assets/AppleLogoSvg";
+import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
+import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
+import InputField from "../../components/InputField";
+import LoginRegisterButton from "../../components/LoginRegisterButton";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -33,8 +33,10 @@ const LoginScreen = () => {
     const onLoginPressed = async (data: any) => {
         setLoading(true);
         try {
-            await Auth.signIn(email, password);
-            navigation.navigate("Vehicles");
+            const res = await Auth.signIn(email, password);
+            console.log(res.attributes?.sub);
+
+            navigation.navigate("Vehicles", { userId: res.attributes?.sub });
             setLoading(false);
         } catch (error: any) {
             Alert.alert("Oops", error.message);

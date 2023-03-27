@@ -1,44 +1,25 @@
-import {
-    View,
-    Text,
-    TextInput,
-    NativeSyntheticEvent,
-    TextInputSubmitEditingEventData,
-    TouchableOpacity,
-    ScrollView,
-} from "react-native";
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import CountryFlag from "react-native-country-flag";
-import {
-    createNativeStackNavigator,
-    NativeStackNavigationProp,
-} from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
 import { useNavigation } from "@react-navigation/native";
-import { getVehicleDetails } from "../tools/getVehicleDetails";
-import SearchHistory from "../components/SearchHistory";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React from "react";
+import { ScrollView, Text, TextInput, View } from "react-native";
+import CountryFlag from "react-native-country-flag";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RootStackParamList } from "../../../App";
+import SearchHistory from "../../components/SearchHistory";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
     "Search"
 >;
 
-const searchReg = async (
-    event: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-    navigation: NavigationProp
-) => {
-    const res = getVehicleDetails(event.nativeEvent.text);
-
-    navigation.navigate("VehicleCheck");
-};
-
 const SearchScreen = () => {
     const navigation = useNavigation<NavigationProp>();
 
     return (
-        <SafeAreaView className="flex-1 bg-[#1e2128] items-center justify-start pt-10">
-            <View className="flex-row w-[90%] h-[11%] shadow-2xl">
+        <SafeAreaView
+            className={`flex-1 bg-[#1e2128] items-center justify-start pt-8 h-full space-y-6`}
+        >
+            <View className="flex-row w-[90%] shadow-2xl h-[11%]">
                 <View className="flex-col bg-[#6c5dd2] px-4 py-4 items-center justify-center rounded-l-md basis-[17%]">
                     <CountryFlag
                         isoCode="gb"
@@ -65,7 +46,7 @@ const SearchScreen = () => {
                     ></TextInput>
                 </View>
             </View>
-            <View className="mt-6 w-[90%] h-[380] shadow-xl rounded-lg bg-[#242731]">
+            <View className="w-[90%] max-h-[75%] shadow-xl rounded-lg bg-[#242731]">
                 <View className="px-6 py-6">
                     <Text className="text-white text-xl">Search History</Text>
                 </View>
@@ -97,18 +78,23 @@ const SearchScreen = () => {
                     />
                 </ScrollView>
             </View>
-            <View className="mt-6 w-[90%] shadow-xl rounded-lg bg-[#242731]">
+            {/* <View className=" w-[90%] h-1/4 shadow-xl rounded-lg bg-[#242731]">
                 <View className="px-6 py-6">
                     <Text className="text-white text-xl">Purchase History</Text>
                 </View>
-                <View className="items-center justify-start">
+                <ScrollView
+                    contentContainerStyle={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
                     <SearchHistory
                         numberPlate="F12 RCB"
                         carModel="2016 Ford Fiesta"
                         date="1 Day Ago"
                     />
-                </View>
-            </View>
+                </ScrollView>
+            </View> */}
         </SafeAreaView>
     );
 };

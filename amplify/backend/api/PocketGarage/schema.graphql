@@ -1,0 +1,28 @@
+type SearchHistory @model @auth(rules: [{ allow: public }]) {
+    id: ID!
+    numberPlate: String!
+    date: AWSDateTime!
+    vehicleDetails: String
+    userID: ID! @index(name: "byUser")
+}
+
+type Vehicle @model @auth(rules: [{ allow: public }]) {
+    id: ID!
+    numberPlate: String!
+    make: String
+    model: String
+    motDate: AWSDateTime!
+    taxDate: AWSDateTime!
+    insuranceDate: AWSDate
+    createdAt: AWSDateTime
+    users: [User] @manyToMany(relationName: "UserVehicle")
+}
+
+type User @model @auth(rules: [{ allow: public }]) {
+    id: ID!
+    name: String
+    email: String!
+    Vehicles: [Vehicle] @manyToMany(relationName: "UserVehicle")
+    SearchHistories: [SearchHistory]
+        @hasMany(indexName: "byUser", fields: ["id"])
+}

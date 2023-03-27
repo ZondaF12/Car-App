@@ -1,8 +1,8 @@
 import { View, Text, SafeAreaView, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import TaxTable from "../components/TaxTable";
+import { RootStackParamList } from "../../../App";
+import TaxTable from "../../components/TaxTable";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,

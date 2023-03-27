@@ -1,20 +1,24 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import VehiclesScreen from "./src/screens/VehiclesScreen";
-import SearchScreen from "./src/screens/SearchScreen";
-import AccountScreen from "./src/screens/AccountScreen";
 import { Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import VehicleCheckScreen from "./src/screens/VehicleCheckScreen";
-import VehicleTaxScreen from "./src/screens/VehicleTaxScreen";
-import VehicleMotScreen from "./src/screens/VehicleMotScreen";
-import LoginScreen from "./src/screens/LoginScreen";
-import RegisterScreen from "./src/screens/RegisterScreen";
-import { Amplify, Auth, Hub } from "aws-amplify";
-import config from "./src/aws-exports";
-import ConfirmEmailScreen from "./src/screens/ConfirmEmailScreen";
+import { Amplify, API, Auth, graphqlOperation, Hub } from "aws-amplify";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GetUserQuery } from "./src/API";
+import config from "./src/aws-exports";
+import { createUser } from "./src/graphql/mutations";
+import { getUser } from "./src/graphql/queries";
+import AccountScreen from "./src/screens/AccountScreen/AccountScreen";
+import ConfirmEmailScreen from "./src/screens/AuthScreen/ConfirmEmailScreen";
+import LoginScreen from "./src/screens/AuthScreen/LoginScreen";
+import RegisterScreen from "./src/screens/AuthScreen/RegisterScreen";
+import SearchScreen from "./src/screens/SearchScreen/SearchScreen";
+import VehicleCheckScreen from "./src/screens/SearchScreen/VehicleCheckScreen";
+import VehicleMotScreen from "./src/screens/SearchScreen/VehicleMotScreen";
+import VehicleTaxScreen from "./src/screens/SearchScreen/VehicleTaxScreen";
+import VehicleInfoScreen from "./src/screens/VehiclesScreen/VehicleInfoScreen";
+import VehiclesScreen from "./src/screens/VehiclesScreen/VehiclesScreen";
 
 Amplify.configure(config);
 
@@ -22,12 +26,13 @@ export type RootStackParamList = {
     Login: undefined;
     Register: undefined;
     ConfirmEmail: any;
-    Vehicles: undefined;
+    Vehicles: any;
     Search: undefined;
     Account: undefined;
     VehicleCheck: any;
     VehicleTax: any;
     VehicleMot: undefined;
+    VehicleInfo: any;
 };
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
@@ -55,11 +60,7 @@ const Tabs = () => {
                 component={VehiclesScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Ionicons
-                            name="car-outline"
-                            size={size}
-                            color={color}
-                        />
+                        <Ionicons name="car-sharp" size={size} color={color} />
                     ),
                 }}
             />
@@ -99,6 +100,24 @@ const App = () => {
                 bypassCache: true,
             });
             setUser(authUser);
+
+            const userData = (await API.graphql(
+                graphqlOperation(getUser, { id: authUser.attributes?.sub })
+            )) as { data: GetUserQuery; errors: any[] };
+
+            if (userData.data?.getUser) {
+                console.log("User Already exists");
+            } else {
+                const newUser = {
+                    id: authUser.attributes?.sub,
+                    email: authUser.attributes?.email,
+                    name: authUser.attributes?.name,
+                };
+
+                const newUserResponse = await API.graphql(
+                    graphqlOperation(createUser, { input: newUser })
+                );
+            }
         } catch (err) {
             setUser(null);
         }
@@ -181,6 +200,11 @@ const App = () => {
                 <Stack.Screen
                     name="VehicleMot"
                     component={VehicleMotScreen}
+                    options={{ headerShown: false, presentation: "modal" }}
+                />
+                <Stack.Screen
+                    name="VehicleInfo"
+                    component={VehicleInfoScreen}
                     options={{ headerShown: false, presentation: "modal" }}
                 />
             </Stack.Navigator>

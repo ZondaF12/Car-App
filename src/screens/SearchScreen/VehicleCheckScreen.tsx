@@ -1,11 +1,6 @@
-import {
-    View,
-    Text,
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Alert,
-} from "react-native";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, {
     useCallback,
     useEffect,
@@ -13,15 +8,20 @@ import React, {
     useRef,
     useState,
 } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    ScrollView,
+    Text,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import { getVehicleDetails } from "../tools/getVehicleDetails";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { getVehicleImage } from "../tools/getVehicleImage";
-import TableFields from "../components/TableFields";
-import { useNavigation } from "@react-navigation/native";
-import ActionRow from "../components/ActionRow";
+import { RootStackParamList } from "../../../App";
+import ActionRow from "../../components/ActionRow";
+import TableFields from "../../components/TableFields";
+import { getVehicleDetails } from "../../tools/getVehicleDetails";
+import { getVehicleImage } from "../../tools/getVehicleImage";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -34,14 +34,30 @@ const VehicleCheckScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["15%", "85%"], []);
+    const [vehicleDetails, setVehicleDetails] = useState<any>();
+    const [vehicleImage, setVehicleImage] = useState<any>();
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChanges", index);
     }, []);
 
-    const vehicleDetails: any = getVehicleDetails(route.params.numberPlate);
-    const vehicleImage: any = getVehicleImage(route.params.numberPlate);
+    useEffect(() => {
+        const onGetVehicleDetails = async () => {
+            const res = await getVehicleDetails(route.params.numberPlate);
+            setVehicleDetails(res);
+        };
 
-    if (vehicleDetails?._j === "Request Failed") {
+        const onGetVehicleImage = async () => {
+            const res = await getVehicleImage(route.params.numberPlate);
+            setVehicleImage(res);
+        };
+
+        onGetVehicleDetails();
+        onGetVehicleImage();
+    }, [route.params.numberPlate]);
+
+    // const vehicleImage: any = undefined; // getVehicleImage(route.params.numberPlate);
+
+    if (vehicleDetails === "Request Failed") {
         navigation.goBack();
         Alert.alert(
             "Invalid Number Plate",
@@ -50,7 +66,7 @@ const VehicleCheckScreen = ({ route }: any) => {
         );
     }
 
-    if (!vehicleDetails?._j) {
+    if (!vehicleDetails) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />
@@ -82,10 +98,10 @@ const VehicleCheckScreen = ({ route }: any) => {
                     contentContainerStyle={{ alignItems: "center" }}
                     showsVerticalScrollIndicator={false}
                 >
-                    {vehicleImage._j ? (
+                    {vehicleImage ? (
                         <Image
                             className="mt-10"
-                            source={{ uri: vehicleImage._j }}
+                            source={{ uri: vehicleImage }}
                             style={{
                                 height: 130,
                                 width: 350,
@@ -95,7 +111,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                     ) : (
                         <Image
                             className="mt-10"
-                            source={require("../../assets/car.png")}
+                            source={require("../../../assets/car.png")}
                             style={{
                                 height: 130,
                                 width: 350,
@@ -107,27 +123,26 @@ const VehicleCheckScreen = ({ route }: any) => {
                     <ActionRow
                         title="Tax"
                         isValid={
-                            vehicleDetails._j.taxStatus === "Taxed" ||
-                            vehicleDetails._j.taxStatus === "SORN"
+                            vehicleDetails.taxStatus === "Taxed" ||
+                            vehicleDetails.taxStatus === "SORN"
                                 ? true
                                 : false
                         }
-                        api={vehicleDetails._j}
+                        api={vehicleDetails}
                     />
                     <ActionRow
                         title="Mot"
                         isValid={
-                            vehicleDetails._j.motStatus === "Valid"
+                            vehicleDetails.motStatus === "Valid"
                                 ? true
-                                : vehicleDetails._j.motStatus ===
+                                : vehicleDetails.motStatus ===
                                   "No details held by DVLA"
                                 ? newCarMotDate(
-                                      vehicleDetails?._j
-                                          ?.monthOfFirstRegistration
+                                      vehicleDetails?.monthOfFirstRegistration
                                   )
                                 : false
                         }
-                        api={vehicleDetails._j}
+                        api={vehicleDetails}
                     />
 
                     <View className="mt-5 rounded-lg w-full border-2 border-[#33343b]">
@@ -138,55 +153,52 @@ const VehicleCheckScreen = ({ route }: any) => {
                                 Basic Vehicle Details
                             </Text>
                         </View>
-                        <TableFields
-                            title="Make"
-                            data={vehicleDetails._j.make}
-                        />
+                        <TableFields title="Make" data={vehicleDetails.make} />
                         {/* <TableFields
                             title="Model"
-                            data={vehicleDetails._j.model}
+                            data={vehicleDetails.model}
                         /> */}
                         <TableFields
                             title="Year"
-                            data={vehicleDetails._j.yearOfManufacture}
+                            data={vehicleDetails.yearOfManufacture}
                         />
                         <TableFields
                             title="Colour"
-                            data={vehicleDetails._j.colour}
+                            data={vehicleDetails.colour}
                         />
                         <TableFields
                             title="Engine Size"
-                            data={`${vehicleDetails._j.engineCapacity} cc`}
+                            data={`${vehicleDetails.engineCapacity} cc`}
                         />
                         <TableFields
                             title="CO2 Emissions"
-                            data={`${vehicleDetails._j.co2Emissions} g/km`}
+                            data={`${vehicleDetails.co2Emissions} g/km`}
                         />
                         <TableFields
                             title="Fuel Type"
-                            data={vehicleDetails._j.fuelType}
+                            data={vehicleDetails.fuelType}
                         />
                         {/* <TableFields
                             title="Transmission"
-                            data={vehicleDetails._j.transmission}
+                            data={vehicleDetails.transmission}
                         /> */}
                         <TableFields
                             title="First Registered"
-                            data={vehicleDetails._j.monthOfFirstRegistration}
+                            data={vehicleDetails.monthOfFirstRegistration}
                         />
                         <TableFields
                             title="Type Approval"
-                            data={vehicleDetails._j.typeApproval}
+                            data={vehicleDetails.typeApproval}
                         />
                         <TableFields
                             title="Wheel Plan"
-                            data={vehicleDetails._j.wheelplan}
+                            data={vehicleDetails.wheelplan}
                         />
                         <TableFields
                             title="Euro Status"
                             data={
-                                vehicleDetails._j.euroStatus
-                                    ? vehicleDetails._j.euroStatus
+                                vehicleDetails.euroStatus
+                                    ? vehicleDetails.euroStatus
                                     : "Unknown"
                             }
                             lastRow
@@ -207,7 +219,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                     <View className="bg-yellow-300 px-2 py-1 rounded-md">
                         <Text className="font-bold text-base">
                             WMWMF72060TL34222
-                            {/* {vehicleDetails._j.vin} */}
+                            {/* {vehicleDetails.vin} */}
                         </Text>
                     </View>
                 </View>
