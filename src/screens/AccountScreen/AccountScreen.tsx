@@ -1,32 +1,33 @@
 import { Entypo, Ionicons } from "@expo/vector-icons";
-import { Auth } from "aws-amplify";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { auth } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 
 const AccountScreen = () => {
     const [user, setUser] = useState<undefined | null>(undefined);
     const [userName, setUserName] = useState<undefined | null>(undefined);
 
-    const checkUser = async () => {
-        try {
-            const authUser = await Auth.currentUserInfo();
-            // console.log(authUser);
+    // const checkUser = async () => {
+    //     try {
+    //         // const authUser = auth.currentUser;
+    //         // console.log(authUser);
 
-            setUser(authUser);
-            setUserName(authUser?.attributes?.name);
-        } catch (err) {
-            setUser(null);
-        }
-    };
+    //         setUser(authUser);
+    //         setUserName(authUser?.attributes?.name);
+    //     } catch (err) {
+    //         setUser(null);
+    //     }
+    // };
 
     useEffect(() => {
-        checkUser();
+        // checkUser();
+        console.log(auth.currentUser?.uid);
     }, []);
 
     const signOut = async () => {
-        Auth.signOut();
+        auth.signOut();
     };
 
     return (

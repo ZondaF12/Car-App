@@ -1,9 +1,13 @@
-import { DataStore } from "@aws-amplify/datastore";
 import "@azure/core-asynciterator-polyfill";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Auth } from "aws-amplify";
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    updateProfile,
+} from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
     Alert,
@@ -17,9 +21,9 @@ import { RootStackParamList } from "../../../App";
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
 import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
+import { auth, database } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
-import { User } from "../../models";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -29,41 +33,40 @@ export type NavigationProp = NativeStackNavigationProp<
 const RegisterScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [registerEmail, setRegisterEmail] = useState("");
+    const [registerPassword, setRegisterPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [name, setName] = useState("");
     const [dobLabel, setDobLabel] = useState("");
     const [loading, setLoading] = useState(false);
 
     const registerPressed = async () => {
-        if (password != confirmPassword) {
+        if (registerPassword != confirmPassword) {
             Alert.alert("Passwords do not match");
             return;
         }
         setLoading(true);
         try {
-            await Auth.signUp({
-                username: email,
-                password: password,
-                attributes: {
-                    name: name,
-                    birthdate: dobLabel,
-                },
-            });
-
-            const res = await DataStore.save(
-                new User({
-                    name: name,
-                    email: email,
-                    Vehicles: [],
-                    SearchHistories: [],
-                })
+            const newUser = await createUserWithEmailAndPassword(
+                auth,
+                registerEmail,
+                registerPassword
             );
 
-            console.log(res);
+            await updateProfile(newUser.user, {
+                displayName: name,
+            });
 
-            navigation.navigate("ConfirmEmail", { email: email });
+            await setDoc(doc(database, "users", newUser.user.uid), {
+                email: newUser.user.email,
+                name: name,
+            });
+
+            await sendEmailVerification(newUser.user);
+
+            console.log(newUser);
+
+            navigation.navigate("ConfirmEmail", { email: registerEmail });
         } catch (err: any) {
             Alert.alert(err.message);
         }
@@ -127,7 +130,7 @@ const RegisterScreen = () => {
                         />
                     }
                     keyboardType="email-address"
-                    setLabel={setEmail}
+                    setLabel={setRegisterEmail}
                 />
                 <InputField
                     label="Full Name"
@@ -150,7 +153,7 @@ const RegisterScreen = () => {
                         />
                     }
                     inputType="password"
-                    setLabel={setPassword}
+                    setLabel={setRegisterPassword}
                 />
                 <InputField
                     label="Confirm Password"

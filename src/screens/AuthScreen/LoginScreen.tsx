@@ -1,8 +1,7 @@
-import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Auth } from "aws-amplify";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
     Alert,
@@ -15,6 +14,7 @@ import { RootStackParamList } from "../../../App";
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
 import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
+import { auth } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
 
@@ -33,10 +33,15 @@ const LoginScreen = () => {
     const onLoginPressed = async (data: any) => {
         setLoading(true);
         try {
-            const res = await Auth.signIn(email, password);
-            console.log(res.attributes?.sub);
+            const user = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-            navigation.navigate("Vehicles", { userId: res.attributes?.sub });
+            console.log(user);
+
+            navigation.navigate("Vehicles");
             setLoading(false);
         } catch (error: any) {
             Alert.alert("Oops", error.message);
@@ -44,29 +49,9 @@ const LoginScreen = () => {
         setLoading(false);
     };
 
-    const onGoogleLoginPressed = async () => {
-        try {
-            const res = await Auth.federatedSignIn({
-                provider: CognitoHostedUIIdentityProvider.Google,
-            });
+    const onGoogleLoginPressed = async () => {};
 
-            console.log(res);
-        } catch (error: any) {
-            Alert.alert("Oops", error.message);
-        }
-    };
-
-    const onAppleLoginPressed = async () => {
-        try {
-            const res = await Auth.federatedSignIn({
-                provider: CognitoHostedUIIdentityProvider.Apple,
-            });
-
-            console.log(res);
-        } catch (error: any) {
-            Alert.alert("Oops", error.message);
-        }
-    };
+    const onAppleLoginPressed = async () => {};
 
     return (
         <SafeAreaView className="flex-1 justify-end bg-[#1e2128]">

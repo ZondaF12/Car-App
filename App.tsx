@@ -2,13 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Amplify, API, Auth, graphqlOperation, Hub } from "aws-amplify";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { GetUserQuery } from "./src/API";
-import config from "./src/aws-exports";
-import { createUser } from "./src/graphql/mutations";
-import { getUser } from "./src/graphql/queries";
+import { auth } from "./firebase";
 import AccountScreen from "./src/screens/AccountScreen/AccountScreen";
 import ConfirmEmailScreen from "./src/screens/AuthScreen/ConfirmEmailScreen";
 import LoginScreen from "./src/screens/AuthScreen/LoginScreen";
@@ -19,8 +15,6 @@ import VehicleMotScreen from "./src/screens/SearchScreen/VehicleMotScreen";
 import VehicleTaxScreen from "./src/screens/SearchScreen/VehicleTaxScreen";
 import VehicleInfoScreen from "./src/screens/VehiclesScreen/VehicleInfoScreen";
 import VehiclesScreen from "./src/screens/VehiclesScreen/VehiclesScreen";
-
-Amplify.configure(config);
 
 export type RootStackParamList = {
     Login: undefined;
@@ -93,54 +87,19 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
     const [user, setUser] = useState<undefined | null>(undefined);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const checkUser = async () => {
-        try {
-            const authUser = await Auth.currentAuthenticatedUser({
-                bypassCache: true,
-            });
-            setUser(authUser);
-
-            const userData = (await API.graphql(
-                graphqlOperation(getUser, { id: authUser.attributes?.sub })
-            )) as { data: GetUserQuery; errors: any[] };
-
-            if (userData.data?.getUser) {
-                console.log("User Already exists");
-            } else {
-                const newUser = {
-                    id: authUser.attributes?.sub,
-                    email: authUser.attributes?.email,
-                    name: authUser.attributes?.name,
-                };
-
-                const newUserResponse = await API.graphql(
-                    graphqlOperation(createUser, { input: newUser })
-                );
-            }
-        } catch (err) {
-            setUser(null);
-        }
+    const checkUser = async (user: any) => {
+        setUser(user);
+        setIsLoading(false);
     };
 
     useEffect(() => {
-        checkUser();
+        const subscriber = auth.onAuthStateChanged(checkUser);
+        return subscriber;
     }, []);
 
-    useEffect(() => {
-        const listener = (data: any) => {
-            if (
-                data.payload.event === "signIn" ||
-                data.payload.event === "signOut"
-            ) {
-                checkUser();
-            }
-            console.log(data);
-        };
-        return Hub.listen("auth", listener);
-    }, []);
-
-    if (user === undefined) {
+    if (isLoading) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />

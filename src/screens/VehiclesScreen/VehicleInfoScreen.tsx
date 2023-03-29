@@ -1,7 +1,7 @@
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { API, Auth, graphqlOperation } from "aws-amplify";
+import { deleteDoc, doc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -12,9 +12,7 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../../../App";
 import MotSvgComponent from "../../../assets/MotSvg";
-import { UserVehiclesByUserIdQuery } from "../../API";
-import { deleteUserVehicle } from "../../graphql/mutations";
-import { userVehiclesByUserId } from "../../graphql/queries";
+import { auth, database } from "../../../firebase";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -70,30 +68,12 @@ const VehicleInfoScreen = ({ route }: any) => {
         );
     };
     const deleteVehicleFromGarage = async () => {
-        const curUser = await Auth.currentAuthenticatedUser();
+        const curUser = auth.currentUser!;
 
-        const getUserVheicle = (await API.graphql(
-            graphqlOperation(userVehiclesByUserId, {
-                filter: { vehicleId: { eq: numberPlate } },
-                userId: curUser.attributes?.sub,
-            })
-        )) as { data: UserVehiclesByUserIdQuery; errors: any[] };
-
-        console.log(
-            getUserVheicle.data?.userVehiclesByUserId?.items[0]?.vehicle
-                ?._version
+        await deleteDoc(
+            doc(database, "users", curUser.uid, "vehicles", numberPlate)
         );
 
-        await API.graphql(
-            graphqlOperation(deleteUserVehicle, {
-                input: {
-                    _version:
-                        getUserVheicle.data?.userVehiclesByUserId?.items[0]
-                            ?.vehicle?._version,
-                    id: getUserVheicle.data?.userVehiclesByUserId?.items[0]?.id,
-                },
-            })
-        );
         navigation.goBack();
     };
 

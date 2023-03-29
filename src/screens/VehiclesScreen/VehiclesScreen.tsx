@@ -2,7 +2,15 @@ import "@azure/core-asynciterator-polyfill";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { API, Auth, graphqlOperation } from "aws-amplify";
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    orderBy,
+    query,
+    setDoc,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -16,17 +24,9 @@ import {
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Observable from "zen-observable-ts";
 import { RootStackParamList } from "../../../App";
-import {
-    GetVehicleQuery,
-    OnDeleteUserVehicleSubscription,
-    UserVehiclesByUserIdQuery,
-} from "../../API";
+import { auth, database } from "../../../firebase";
 import VehicleInfo from "../../components/VehicleInfo";
-import { createUserVehicle, createVehicle } from "../../graphql/mutations";
-import { getVehicle, userVehiclesByUserId } from "../../graphql/queries";
-import { onDeleteUserVehicle } from "../../graphql/subscriptions";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -34,106 +34,77 @@ export type NavigationProp = NativeStackNavigationProp<
     "Vehicles"
 >;
 
-type SubscriptionValue = {
-    value: {
-        data: OnDeleteUserVehicleSubscription;
-    };
-};
-
 const newCarMotDate = (registeredDate: Date) => {
     const regDate = new Date(registeredDate);
-    const motDate = new Date(regDate.setFullYear(regDate.getFullYear() + 3));
+    const motDate = new Date(
+        regDate.setFullYear(regDate.getFullYear() + 3)
+    ).toISOString();
 
     return motDate;
 };
 
 const VehiclesScreen = () => {
     const navigation = useNavigation<NavigationProp>();
-    const [userVehicles, setUserVehicles] = useState<any>();
+    const [userVehicles, setUserVehicles] = useState<any>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [plateAlreadySaved, setPlateAlreadySaved] = useState(false);
 
     const checkUserVehicles = async () => {
-        const curUser = await Auth.currentAuthenticatedUser();
-        const checkVehicles = (await API.graphql(
-            graphqlOperation(userVehiclesByUserId, {
-                userId: curUser.attributes?.sub,
-            })
-        )) as { data: UserVehiclesByUserIdQuery; errors: any[] };
+        const curUser = auth.currentUser!;
 
-        setUserVehicles(checkVehicles.data?.userVehiclesByUserId?.items);
+        const checkVehicles = await getDocs(
+            query(
+                collection(database, "users", curUser.uid, "vehicles"),
+                orderBy("createdAt")
+            )
+        );
+
+        checkVehicles.forEach((QueryDocumentSnapshot) => {
+            if (
+                !userVehicles.some(
+                    (e: any) => e.numberPlate === QueryDocumentSnapshot.id
+                )
+            ) {
+                userVehicles.push(QueryDocumentSnapshot.data());
+            }
+        });
+
         setIsLoading(false);
     };
 
     useEffect(() => {
         setIsLoading(true);
         checkUserVehicles();
-
-        let subscription: any;
-        const initSubscription = async () => {
-            const curUser = await Auth.currentAuthenticatedUser();
-            subscription = API.graphql(
-                graphqlOperation(onDeleteUserVehicle, {
-                    filter: { userId: { eq: curUser.attributes?.sub } },
-                })
-            ) as Observable<any>;
-
-            subscription.subscribe({
-                next: ({ value }: SubscriptionValue) => {
-                    console.log("UPDATED");
-                    console.log(value);
-                    setIsLoading(true);
-                    checkUserVehicles();
-                },
-                error: (err: any) => console.warn(err),
-            });
-        };
-        initSubscription();
-        return () => subscription.unsubscribe();
     }, []);
 
     const addNewVehicle = async (numberPlate: string) => {
         setIsLoading(true);
         setModalVisible(false);
+        const curUser = auth.currentUser!;
+
         // Check if we already have that vehicle added
-        const curUser = await Auth.currentAuthenticatedUser();
-        const checkVehicles = (await API.graphql(
-            graphqlOperation(userVehiclesByUserId, {
-                userId: curUser.attributes?.sub,
-            })
-        )) as { data: UserVehiclesByUserIdQuery; errors: any[] };
-
-        // console.log(checkVehicles.data?.userVehiclesByUserId?.items);
-
-        const duplicate = checkVehicles.data?.userVehiclesByUserId?.items.find(
-            (item: any) => item.vehicleId === numberPlate
+        const userVehicleDoc = doc(
+            database,
+            "users",
+            curUser?.uid,
+            "vehicles",
+            numberPlate
         );
+        const userVehicleDuplicateQuery = await getDoc(userVehicleDoc);
 
-        if (duplicate) {
+        if (userVehicleDuplicateQuery.data()) {
             Alert.alert("Vehicle already Added");
             setIsLoading(false);
             return;
         }
 
-        // for (let vehicleKey in checkVehicles.data?.userVehiclesByUserId
-        //     ?.items) {
-        //     if (
-        //         checkVehicles.data?.userVehiclesByUserId?.items[vehicleKey]
-        //             .vehicleId === numberPlate
-        //     ) {
-        //         Alert.alert("Vehicle already Added");
-        //         setIsLoading(false);
-        //         return;
-        //     }
-        // }
-
         // Create new Vehicle if it doesnt already exist
-        const vehicleData = (await API.graphql(
-            graphqlOperation(getVehicle, { id: numberPlate })
-        )) as { data: GetVehicleQuery; errors: any[] };
+        const vehicleDoc = doc(database, "vehicles", numberPlate);
+        const q = await getDoc(vehicleDoc);
 
-        if (vehicleData.data?.getVehicle) {
+        let newVehicle;
+        if (q.data()) {
             console.log("Vehicle Already Exists");
         } else {
             // Create New Vehicle
@@ -141,17 +112,7 @@ const VehiclesScreen = () => {
                 const searchForVehicle = await getVehicleDetails(numberPlate);
                 console.log(searchForVehicle);
 
-                console.log(
-                    newCarMotDate(searchForVehicle.monthOfFirstRegistration)
-                );
-
-                // console.log(
-                //     new Date(searchForVehicle.taxDueDate).toISOString()
-                // );
-
-                const newVehicle = {
-                    id: numberPlate,
-                    numberPlate: numberPlate,
+                newVehicle = {
                     taxDate: searchForVehicle.taxDueDate
                         ? new Date(searchForVehicle.taxDueDate).toISOString()
                         : newCarMotDate(
@@ -164,11 +125,11 @@ const VehiclesScreen = () => {
                           ),
                     make: searchForVehicle.make,
                 };
-                console.log(newVehicle);
 
-                const newVehicleData = await API.graphql(
-                    graphqlOperation(createVehicle, { input: newVehicle })
-                );
+                await setDoc(doc(database, "vehicles", numberPlate), {
+                    ...newVehicle,
+                    numberPlate: numberPlate,
+                });
             } catch (error: any) {
                 console.error(error);
                 setIsLoading(false);
@@ -176,14 +137,22 @@ const VehiclesScreen = () => {
             }
         }
         // Add the vehicle to the user
-        await API.graphql(
-            graphqlOperation(createUserVehicle, {
-                input: {
-                    userId: curUser.attributes?.sub,
-                    vehicleId: numberPlate,
-                },
-            })
-        );
+        if (!userVehicleDuplicateQuery.data()) {
+            let addVehicle;
+            if (q.data()) {
+                addVehicle = q.data();
+            } else {
+                addVehicle = newVehicle;
+            }
+            await setDoc(
+                doc(database, "users", curUser?.uid, "vehicles", numberPlate),
+                {
+                    ...addVehicle,
+                    createdAt: new Date().toISOString(),
+                    numberPlate: numberPlate,
+                }
+            );
+        }
 
         // refresh the screen to display the new vehicle
         await checkUserVehicles();
@@ -284,19 +253,19 @@ const VehiclesScreen = () => {
                 contentInsetAdjustmentBehavior="automatic"
                 showsVerticalScrollIndicator={false}
             >
-                {userVehicles ? (
+                {userVehicles.length > 0 ? (
                     userVehicles.map((vehicle: any) => (
                         <VehicleInfo
-                            numberPlate={vehicle.vehicle.numberPlate}
-                            make={vehicle.vehicle.make}
-                            model={vehicle.vehicle.model}
-                            motDate={vehicle.vehicle.motDate}
-                            taxDate={vehicle.vehicle.taxDate}
+                            numberPlate={vehicle.numberPlate}
+                            make={vehicle.make}
+                            model={vehicle.model}
+                            motDate={vehicle.motDate}
+                            taxDate={vehicle.taxDate}
                             onClick={() =>
                                 vehcileInfoClicked(
-                                    vehicle.vehicle.numberPlate,
-                                    vehicle.vehicle.motDate,
-                                    vehicle.vehicle.taxDate
+                                    vehicle.numberPlate,
+                                    vehicle.motDate,
+                                    vehicle.taxDate
                                 )
                             }
                         />
