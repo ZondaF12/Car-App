@@ -1,6 +1,5 @@
 import "@azure/core-asynciterator-polyfill";
 import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
@@ -43,8 +42,7 @@ const newCarMotDate = (registeredDate: Date) => {
     return motDate;
 };
 
-const VehiclesScreen = () => {
-    const navigation = useNavigation<NavigationProp>();
+const VehiclesScreen = ({ navigation }: any) => {
     const [userVehicles, setUserVehicles] = useState<any>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -61,33 +59,22 @@ const VehiclesScreen = () => {
         );
 
         checkVehicles.forEach((QueryDocumentSnapshot) => {
-            if (
-                !userVehicles.some(
-                    (e: any) => e.numberPlate === QueryDocumentSnapshot.id
-                )
-            ) {
-                userVehicles.push(QueryDocumentSnapshot.data());
-            }
+            setUserVehicles((vehicle: any) =>
+                vehicle.concat(QueryDocumentSnapshot.data())
+            );
         });
-
-        setIsLoading(false);
     };
 
     useEffect(() => {
-        setIsLoading(true);
-        checkUserVehicles();
+        const unsubscribe = navigation.addListener("focus", async () => {
+            setIsLoading(true);
+            setUserVehicles([]);
+            await checkUserVehicles();
+            setIsLoading(false);
+        });
 
-        // const curUser = auth.currentUser!;
-
-        // const subscription = onSnapshot(
-        //     doc(database, "users", curUser.uid),
-        //     (docSnap: any) => {
-        //         docSnap.forEach((element: any) => {
-        //             console.log(element.data());
-        //         });
-        //     }
-        // );
-    }, []);
+        return unsubscribe;
+    }, [navigation]);
 
     const addNewVehicle = async (numberPlate: string) => {
         setIsLoading(true);
