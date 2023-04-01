@@ -3,9 +3,11 @@ import { AntDesign } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
+    collectionGroup,
     doc,
     getDoc,
     getDocs,
+    onSnapshot,
     orderBy,
     query,
     setDoc,
@@ -55,7 +57,7 @@ const VehiclesScreen = ({ navigation }: any) => {
 
         const checkVehicles = await getDocs(
             query(
-                collection(database, "users", curUser.uid, "vehicles"),
+                collection(database, "users", curUser.uid, "userVehicles"),
                 orderBy("createdAt")
             )
         );
@@ -68,14 +70,23 @@ const VehiclesScreen = ({ navigation }: any) => {
     };
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", async () => {
-            setIsLoading(true);
-            await checkUserVehicles();
-            setIsLoading(false);
+        const q = query(
+            collectionGroup(database, "userVehicles"),
+            orderBy("createdAt")
+        );
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            setUserVehicles([]);
+
+            querySnapshot.forEach(async (doc) => {
+                setUserVehicles((vehicle: any) => vehicle.concat(doc.data()));
+            });
         });
 
-        return unsubscribe;
-    }, [navigation]);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
 
     const addNewVehicle = async (numberPlate: string) => {
         setIsLoading(true);
@@ -87,7 +98,7 @@ const VehiclesScreen = ({ navigation }: any) => {
             database,
             "users",
             curUser?.uid,
-            "vehicles",
+            "userVehicles",
             numberPlate
         );
         const userVehicleDuplicateQuery = await getDoc(userVehicleDoc);
@@ -144,7 +155,13 @@ const VehiclesScreen = ({ navigation }: any) => {
                 addVehicle = newVehicle;
             }
             await setDoc(
-                doc(database, "users", curUser?.uid, "vehicles", numberPlate),
+                doc(
+                    database,
+                    "users",
+                    curUser?.uid,
+                    "userVehicles",
+                    numberPlate
+                ),
                 {
                     ...addVehicle,
                     createdAt: new Date().toISOString(),

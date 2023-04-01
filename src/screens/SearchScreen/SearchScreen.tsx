@@ -1,5 +1,12 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import {
+    collection,
+    collectionGroup,
+    getDocs,
+    onSnapshot,
+    orderBy,
+    query,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -39,16 +46,37 @@ const SearchScreen = ({ navigation }: any) => {
         });
     };
 
+    // useEffect(() => {
+    //     const unsubscribe = navigation.addListener("focus", async () => {
+    //         setIsLoading(true);
+    //         setSearchHistory([]);
+    //         await checkSearchHistory();
+    //         setIsLoading(false);
+    //     });
+
+    //     return unsubscribe;
+    // }, [navigation]);
+
     useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", async () => {
-            setIsLoading(true);
+        const q = query(
+            collectionGroup(database, "searchHistory"),
+            orderBy("createdAt", "desc")
+        );
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
             setSearchHistory([]);
-            await checkSearchHistory();
-            setIsLoading(false);
+
+            querySnapshot.forEach(async (doc) => {
+                setSearchHistory((vehicleHistory: any) =>
+                    vehicleHistory.concat(doc.data())
+                );
+            });
         });
 
-        return unsubscribe;
-    }, [navigation]);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
 
     if (isLoading) {
         return (

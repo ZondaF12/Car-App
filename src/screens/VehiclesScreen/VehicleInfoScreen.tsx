@@ -71,7 +71,7 @@ const VehicleInfoScreen = ({ route }: any) => {
         const curUser = auth.currentUser!;
 
         await deleteDoc(
-            doc(database, "users", curUser.uid, "vehicles", numberPlate)
+            doc(database, "users", curUser.uid, "userVehicles", numberPlate)
         );
 
         navigation.goBack();
