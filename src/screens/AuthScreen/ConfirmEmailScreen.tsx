@@ -1,11 +1,10 @@
-import { View, Text, SafeAreaView, Alert } from "react-native";
-import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useState } from "react";
+import { Alert, SafeAreaView, Text, View } from "react-native";
 import { RootStackParamList } from "../../../App";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
-import { Auth } from "aws-amplify";
-import { useNavigation } from "@react-navigation/native";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -19,7 +18,6 @@ const ConfirmEmailScreen = ({ route }: any) => {
 
     const onConfirmPressed = async () => {
         try {
-            await Auth.confirmSignUp(email, code);
             navigation.navigate("Login");
         } catch (err: any) {
             Alert.alert("Oops", err.message);
@@ -28,7 +26,6 @@ const ConfirmEmailScreen = ({ route }: any) => {
 
     const onResendPressed = async () => {
         try {
-            await Auth.resendSignUp(email);
             Alert.alert("Success", "Code was resent to your email");
         } catch (err: any) {
             Alert.alert("Oops", err.message);

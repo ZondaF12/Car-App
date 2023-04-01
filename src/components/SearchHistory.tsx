@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import moment from "moment";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import { RootStackParamList } from "../../App";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -12,10 +13,11 @@ export type NavigationProp = NativeStackNavigationProp<
 type Props = {
     numberPlate: string;
     carModel: string;
-    date: string; //Change this to date
+    regYear: number;
+    date: Date; //Change this to date
 };
 
-const SearchHistory = ({ numberPlate, carModel, date }: Props) => {
+const SearchHistory = ({ numberPlate, carModel, regYear, date }: Props) => {
     const navigation = useNavigation<NavigationProp>();
 
     return (
@@ -33,8 +35,12 @@ const SearchHistory = ({ numberPlate, carModel, date }: Props) => {
                 </Text>
             </View>
             <View className="ml-4">
-                <Text className="text-white text-base">{carModel}</Text>
-                <Text className="text-[#707175] text-xs">{date}</Text>
+                <Text className="text-white text-base">
+                    {`${regYear} ${carModel}`}
+                </Text>
+                <Text className="text-[#707175] text-xs">
+                    {moment(date).fromNow()}
+                </Text>
             </View>
         </TouchableOpacity>
     );

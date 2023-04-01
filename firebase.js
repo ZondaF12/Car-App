@@ -44,5 +44,6 @@ if (!getApps().length) {
         console.log("Error initializing app: " + error);
     }
 }
+
 export const auth = getAuth(app);
 export const database = getFirestore(app);

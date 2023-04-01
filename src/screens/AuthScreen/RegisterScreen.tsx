@@ -66,7 +66,7 @@ const RegisterScreen = () => {
 
             console.log(newUser);
 
-            navigation.navigate("ConfirmEmail", { email: registerEmail });
+            // navigation.navigate("ConfirmEmail", { email: registerEmail });
         } catch (err: any) {
             Alert.alert(err.message);
         }

@@ -1,6 +1,7 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import React, {
     useCallback,
     useEffect,
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../../../App";
+import { auth, database } from "../../../firebase";
 import ActionRow from "../../components/ActionRow";
 import TableFields from "../../components/TableFields";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
@@ -30,30 +32,83 @@ export type NavigationProp = NativeStackNavigationProp<
 
 /* Add https://reactnative.dev/docs/refreshcontrol */
 
+const addToSearchHistory = async (
+    numberPlate: string,
+    vehicleMake: string,
+    yearOfReg: number
+) => {
+    const curUser = auth.currentUser!;
+
+    /* Check if numberplate already exists in history - if it does then update
+     * the entry of the createdAt to the current time */
+    const userSearchHistoryDoc = doc(
+        database,
+        "users",
+        curUser?.uid,
+        "searchHistory",
+        numberPlate
+    );
+
+    const userSearchHistoryDuplicateQuery = await getDoc(userSearchHistoryDoc);
+
+    if (userSearchHistoryDuplicateQuery.data()) {
+        /* Update search date in db entry */
+        await updateDoc(userSearchHistoryDoc, {
+            createdAt: new Date().toISOString(),
+        });
+    } else {
+        /* Add the numberplate to the datatbase */
+
+        await setDoc(
+            doc(database, "users", curUser?.uid, "searchHistory", numberPlate),
+            {
+                createdAt: new Date().toISOString(),
+                numberPlate: numberPlate,
+                make: vehicleMake,
+                yearOfManufacture: yearOfReg,
+            }
+        );
+    }
+};
+
 const VehicleCheckScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["15%", "85%"], []);
     const [vehicleDetails, setVehicleDetails] = useState<any>();
     const [vehicleImage, setVehicleImage] = useState<any>();
+    const vehicleRegPlate = route.params.numberPlate.replace(/\s/g, "");
+
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChanges", index);
     }, []);
 
     useEffect(() => {
         const onGetVehicleDetails = async () => {
-            const res = await getVehicleDetails(route.params.numberPlate);
+            const res = await getVehicleDetails(vehicleRegPlate);
             setVehicleDetails(res);
         };
 
         const onGetVehicleImage = async () => {
-            const res = await getVehicleImage(route.params.numberPlate);
+            const res = await getVehicleImage(vehicleRegPlate);
             setVehicleImage(res);
         };
 
         onGetVehicleDetails();
         onGetVehicleImage();
-    }, [route.params.numberPlate]);
+    }, [vehicleRegPlate]);
+
+    useEffect(() => {
+        const checkSearchHistory = async () => {
+            await addToSearchHistory(
+                vehicleRegPlate,
+                vehicleDetails.make,
+                vehicleDetails.yearOfManufacture
+            );
+        };
+
+        checkSearchHistory();
+    }, [vehicleDetails]);
 
     // const vehicleImage: any = undefined; // getVehicleImage(route.params.numberPlate);
 

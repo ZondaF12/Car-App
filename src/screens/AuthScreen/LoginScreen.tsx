@@ -1,7 +1,16 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import {
+    BaseNavigationContainer,
+    useNavigation,
+} from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import {
+    OAuthProvider,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+} from "firebase/auth";
 import React, { useState } from "react";
 import {
     Alert,
@@ -23,12 +32,21 @@ export type NavigationProp = NativeStackNavigationProp<
     "Login"
 >;
 
+WebBrowser.maybeCompleteAuthSession();
+
 const LoginScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState(undefined);
+
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        iosClientId:
+            "1091684992494-vc38t5sbt2jpk3a1al1kdboso9q19no2.apps.googleusercontent.com",
+        clientId:
+            "1091684992494-v5fcm398rreg0d3b5va0l7p1ii10qh6a.apps.googleusercontent.com",
+    });
 
     const onLoginPressed = async (data: any) => {
         setLoading(true);
@@ -49,9 +67,26 @@ const LoginScreen = () => {
         setLoading(false);
     };
 
-    const onGoogleLoginPressed = async () => {};
+    const onGoogleLoginPressed = async () => {
+        try {
+            promptAsync();
 
-    const onAppleLoginPressed = async () => {};
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const onAppleLoginPressed = async () => {
+        try {
+            const provider = new OAuthProvider("apple.com");
+            const res = await signInWithPopup(auth, provider);
+            BaseNavigationContainer;
+            console.log(res);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 justify-end bg-[#1e2128]">
@@ -114,7 +149,7 @@ const LoginScreen = () => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={onAppleLoginPressed}
+                        onPress={() => onAppleLoginPressed()}
                         className="border-[#707175] border-2 rounded-lg px-10 py-2"
                     >
                         <AppleLogoSvg height={24} width={24} color={"#fff"} />

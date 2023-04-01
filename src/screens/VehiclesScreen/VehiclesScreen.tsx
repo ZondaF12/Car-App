@@ -76,6 +76,17 @@ const VehiclesScreen = () => {
     useEffect(() => {
         setIsLoading(true);
         checkUserVehicles();
+
+        // const curUser = auth.currentUser!;
+
+        // const subscription = onSnapshot(
+        //     doc(database, "users", curUser.uid),
+        //     (docSnap: any) => {
+        //         docSnap.forEach((element: any) => {
+        //             console.log(element.data());
+        //         });
+        //     }
+        // );
     }, []);
 
     const addNewVehicle = async (numberPlate: string) => {
