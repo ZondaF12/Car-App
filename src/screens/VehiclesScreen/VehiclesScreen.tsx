@@ -51,6 +51,8 @@ const VehiclesScreen = ({ navigation }: any) => {
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
 
+        setUserVehicles([]);
+
         const checkVehicles = await getDocs(
             query(
                 collection(database, "users", curUser.uid, "vehicles"),
@@ -68,7 +70,6 @@ const VehiclesScreen = ({ navigation }: any) => {
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", async () => {
             setIsLoading(true);
-            setUserVehicles([]);
             await checkUserVehicles();
             setIsLoading(false);
         });
