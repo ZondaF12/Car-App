@@ -1,7 +1,7 @@
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../../App";
 import MotSvgComponent from "../../../assets/MotSvg";
 import { auth, database } from "../../../firebase";
@@ -22,15 +23,16 @@ export type NavigationProp = NativeStackNavigationProp<
 const VehicleInfoScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
 
-    const { numberPlate, motDate, taxDate } = route.params;
+    const { numberPlate, motDate, taxDate, insuranceDate } = route.params;
     const [motPercent, setMotPercent] = useState<any>();
     const [taxPercent, setTaxPercent] = useState<any>();
     const [insurancePercent, setInsurancePercent] = useState<any>();
-    const [insuranceDate, setInsuranceDate] = useState<any>();
+    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
     useEffect(() => {
         dateConverter(motDate, "MOT");
         dateConverter(taxDate, "TAX");
+        dateConverter(insuranceDate, "Insurance");
     }, []);
 
     const dateConverter = async (expiryDate: Date, type: string) => {
@@ -45,8 +47,10 @@ const VehicleInfoScreen = ({ route }: any) => {
 
         if (type === "MOT") {
             setMotPercent(Math.round((q / d) * 100));
-        } else {
+        } else if (type === "TAX") {
             setTaxPercent(Math.round((q / d) * 100));
+        } else {
+            setInsurancePercent(Math.round((q / d) * 100));
         }
     };
 
@@ -75,6 +79,25 @@ const VehicleInfoScreen = ({ route }: any) => {
         );
 
         navigation.goBack();
+    };
+
+    const handleUpdateInsuranceDate = async (date: Date) => {
+        /* Add submitted date to the userVehicle vehicle doc */
+        const curUser = auth.currentUser!;
+
+        const userVehicleDoc = doc(
+            database,
+            "users",
+            curUser?.uid,
+            "userVehicles",
+            numberPlate
+        );
+
+        await updateDoc(userVehicleDoc, {
+            insuranceDate: new Date(date).toISOString(),
+        });
+
+        setIsDatePickerVisible(false);
     };
 
     return (
@@ -138,7 +161,14 @@ const VehicleInfoScreen = ({ route }: any) => {
                                 Insurance Valid Until
                             </Text>
                             {insuranceDate ? (
-                                <TouchableOpacity className="flex-row bg-[#1e2128] p-2 items-center justify-center rounded-lg space-x-2">
+                                <TouchableOpacity
+                                    className="flex-row bg-[#1e2128] p-2 items-center justify-center rounded-lg space-x-2"
+                                    onPress={() =>
+                                        setIsDatePickerVisible(
+                                            !isDatePickerVisible
+                                        )
+                                    }
+                                >
                                     <Feather
                                         name="edit-3"
                                         size={16}
@@ -151,9 +181,18 @@ const VehicleInfoScreen = ({ route }: any) => {
                         </View>
                         <Text className="text-2xl text-white">
                             {insurancePercent ? (
-                                new Date(motDate).toDateString()
+                                <Text>
+                                    {new Date(insuranceDate).toDateString()}
+                                </Text>
                             ) : (
-                                <TouchableOpacity className="flex-row bg-[#1e2128] px-4 py-2 items-center justify-center rounded-lg space-x-2">
+                                <TouchableOpacity
+                                    className="flex-row bg-[#1e2128] px-4 py-2 items-center justify-center rounded-lg space-x-2"
+                                    onPress={() =>
+                                        setIsDatePickerVisible(
+                                            !isDatePickerVisible
+                                        )
+                                    }
+                                >
                                     <Text className="text-white">Set Date</Text>
                                     <Feather
                                         name="edit-3"
@@ -163,6 +202,14 @@ const VehicleInfoScreen = ({ route }: any) => {
                                 </TouchableOpacity>
                             )}
                         </Text>
+
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={handleUpdateInsuranceDate}
+                            onCancel={() => setIsDatePickerVisible(false)}
+                            display={"inline"}
+                        />
                     </View>
                 </View>
             </View>

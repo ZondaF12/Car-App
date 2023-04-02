@@ -178,12 +178,14 @@ const VehiclesScreen = ({ navigation }: any) => {
     const vehcileInfoClicked = async (
         numberPlate: string,
         motDate: Date,
-        taxDate: Date
+        taxDate: Date,
+        insuranceDate: Date
     ) => {
         navigation.navigate("VehicleInfo", {
             numberPlate: numberPlate,
             motDate: motDate,
             taxDate: taxDate,
+            insuranceDate: insuranceDate,
         });
     };
 
@@ -277,11 +279,13 @@ const VehiclesScreen = ({ navigation }: any) => {
                             model={vehicle.model}
                             motDate={vehicle.motDate}
                             taxDate={vehicle.taxDate}
+                            insuranceDate={vehicle.insuranceDate}
                             onClick={() =>
                                 vehcileInfoClicked(
                                     vehicle.numberPlate,
                                     vehicle.motDate,
-                                    vehicle.taxDate
+                                    vehicle.taxDate,
+                                    vehicle.insuranceDate
                                 )
                             }
                         />

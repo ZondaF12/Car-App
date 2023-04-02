@@ -10,7 +10,7 @@ type Props = {
     model?: string;
     motDate?: any;
     taxDate?: any;
-    insuranceDate?: string;
+    insuranceDate?: any;
     onClick: any;
 };
 
@@ -25,10 +25,12 @@ const VehicleInfo = ({
 }: Props) => {
     const [motPercent, setMotPercent] = useState<any>();
     const [taxPercent, setTaxPercent] = useState<any>();
+    const [insurancePercent, setInsurancePercent] = useState<any>();
 
     useEffect(() => {
         dateConverter(motDate, "MOT");
         dateConverter(taxDate, "TAX");
+        dateConverter(insuranceDate, "Insurance");
     }, []);
 
     const dateConverter = async (expiryDate: Date, type: string) => {
@@ -43,8 +45,10 @@ const VehicleInfo = ({
 
         if (type === "MOT") {
             setMotPercent(Math.round((q / d) * 100));
-        } else {
+        } else if (type === "TAX") {
             setTaxPercent(Math.round((q / d) * 100));
+        } else {
+            setInsurancePercent(Math.round((q / d) * 100));
         }
     };
 
@@ -117,17 +121,25 @@ const VehicleInfo = ({
                     />
                 </ProgressCircle>
                 <ProgressCircle
-                    percent={100 - 52}
+                    percent={
+                        insurancePercent && insurancePercent <= 100
+                            ? 100 - insurancePercent
+                            : 100
+                    }
                     radius={25}
                     borderWidth={2}
-                    color="#fff"
+                    color={insurancePercent >= 75 ? "#ff754c" : "#fff"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
                     <MaterialIcons
                         name="attach-money"
                         size={24}
-                        color="white"
+                        color={
+                            insurancePercent >= 75 && insurancePercent <= 100
+                                ? "#ff754c"
+                                : "#fff"
+                        }
                     />
                 </ProgressCircle>
             </View>
