@@ -3,7 +3,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
-    collectionGroup,
     doc,
     getDoc,
     getDocs,
@@ -48,7 +47,6 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [userVehicles, setUserVehicles] = useState<any>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [plateAlreadySaved, setPlateAlreadySaved] = useState(false);
 
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
@@ -70,8 +68,10 @@ const VehiclesScreen = ({ navigation }: any) => {
     };
 
     useEffect(() => {
+        const curUser = auth.currentUser!;
+
         const q = query(
-            collectionGroup(database, "userVehicles"),
+            collection(database, "users", curUser.uid, "userVehicles"),
             orderBy("createdAt")
         );
 

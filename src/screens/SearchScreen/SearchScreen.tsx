@@ -1,7 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
-    collectionGroup,
     getDocs,
     onSnapshot,
     orderBy,
@@ -54,13 +53,13 @@ const SearchScreen = ({ navigation }: any) => {
     };
 
     useEffect(() => {
+        const curUser = auth.currentUser!;
+
         setIsLoading(true);
         const q = query(
-            collectionGroup(database, "searchHistory"),
+            collection(database, "users", curUser.uid, "searchHistory"),
             orderBy("createdAt", "desc")
         );
-
-        console.log(searchHistory);
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             setSearchHistory([]);
