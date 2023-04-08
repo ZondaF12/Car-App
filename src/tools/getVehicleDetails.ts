@@ -1,6 +1,5 @@
-import axios from "axios";
-
 import { DVLA_API } from "@env";
+import axios from "axios";
 
 export const getVehicleDetails = async (numberPlate: string) => {
     const data = JSON.stringify({ registrationNumber: numberPlate });

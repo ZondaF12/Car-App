@@ -83,7 +83,7 @@ const VehicleInfo = ({
                     radius={25}
                     borderWidth={2}
                     color={
-                        motPercent >= 75 && motPercent <= 100
+                        motPercent >= 83 && motPercent <= 100
                             ? "#ff754c"
                             : "#fff"
                     }
@@ -92,7 +92,7 @@ const VehicleInfo = ({
                 >
                     <MotSvgComponent
                         color={
-                            motPercent >= 75 && motPercent <= 100
+                            motPercent >= 83 && motPercent <= 100
                                 ? "#ff754c"
                                 : "#fff"
                         }
@@ -106,7 +106,7 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={taxPercent >= 75 ? "#ff754c" : "#fff"}
+                    color={taxPercent >= 83 ? "#ff754c" : "#fff"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
@@ -114,7 +114,7 @@ const VehicleInfo = ({
                         name="shield"
                         size={24}
                         color={
-                            taxPercent >= 75 && taxPercent <= 100
+                            taxPercent >= 83 && taxPercent <= 100
                                 ? "#ff754c"
                                 : "#fff"
                         }
@@ -128,7 +128,7 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={insurancePercent >= 75 ? "#ff754c" : "#fff"}
+                    color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
@@ -136,7 +136,7 @@ const VehicleInfo = ({
                         name="attach-money"
                         size={24}
                         color={
-                            insurancePercent >= 75 && insurancePercent <= 100
+                            insurancePercent >= 83 && insurancePercent <= 100
                                 ? "#ff754c"
                                 : "#fff"
                         }

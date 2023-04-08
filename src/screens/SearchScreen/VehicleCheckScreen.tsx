@@ -95,7 +95,7 @@ const VehicleCheckScreen = ({ route }: any) => {
         };
 
         onGetVehicleDetails();
-        onGetVehicleImage();
+        // onGetVehicleImage();
     }, [vehicleRegPlate]);
 
     useEffect(() => {
@@ -184,6 +184,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                                 : false
                         }
                         api={vehicleDetails}
+                        numberPlate={vehicleRegPlate}
                     />
                     <ActionRow
                         title="Mot"
@@ -198,6 +199,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                                 : false
                         }
                         api={vehicleDetails}
+                        numberPlate={vehicleRegPlate}
                     />
 
                     <View className="mt-5 rounded-lg w-full border-2 border-[#33343b]">

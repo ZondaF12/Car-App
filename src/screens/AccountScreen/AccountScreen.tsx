@@ -6,25 +6,27 @@ import { auth } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 
 const AccountScreen = () => {
-    const [user, setUser] = useState<undefined | null>(undefined);
-    const [userName, setUserName] = useState<undefined | null>(undefined);
+    const [user, setUser] = useState<any>("");
+    const [userName, setUserName] = useState<any>("");
 
-    // const checkUser = async () => {
-    //     try {
-    //         // const authUser = auth.currentUser;
-    //         // console.log(authUser);
+    const checkUser = async () => {
+        try {
+            const authUser = auth.currentUser!;
+            // console.log(authUser);
 
-    //         setUser(authUser);
-    //         setUserName(authUser?.attributes?.name);
-    //     } catch (err) {
-    //         setUser(null);
-    //     }
-    // };
+            const getUserName = authUser.email!.split("@");
+
+            setUser(authUser);
+            setUserName(getUserName[0]);
+        } catch (err) {
+            setUser("");
+        }
+    };
 
     useEffect(() => {
-        // checkUser();
-        console.log(auth.currentUser?.uid);
-    }, []);
+        checkUser();
+        console.log(auth.currentUser?.email);
+    }, [auth.currentUser]);
 
     const signOut = async () => {
         auth.signOut();
@@ -67,6 +69,7 @@ const AccountScreen = () => {
                     icon={"notifications"}
                     primaryColor="#99d9fc"
                     secondaryColor="#233f81"
+                    switchButton
                 />
                 <SettingsButton
                     label={"Dark Mode"}

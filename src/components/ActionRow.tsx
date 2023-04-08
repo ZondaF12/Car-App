@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Text, TouchableOpacity, View } from "react-native";
+import { RootStackParamList } from "../../App";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -13,9 +13,10 @@ type Props = {
     title: string;
     isValid: boolean;
     api: any;
+    numberPlate: string;
 };
 
-const ActionRow = ({ title, isValid, api }: Props) => {
+const ActionRow = ({ title, isValid, api, numberPlate }: Props) => {
     const navigation = useNavigation<NavigationProp>();
     const buttonColor = isValid ? "#6c5dd2" : "#ff754c";
 
@@ -30,7 +31,11 @@ const ActionRow = ({ title, isValid, api }: Props) => {
                           co2Emissions: api.co2Emissions,
                           registered: api.monthOfFirstRegistration,
                       })
-                    : navigation.navigate("VehicleMot")
+                    : navigation.navigate("VehicleMot", {
+                          motStatus: api.motStatus,
+                          motExpiry: api.motExpiryDate,
+                          numberPlate: numberPlate,
+                      })
             }
         >
             <View className="flex-1 justify-center items-center">

@@ -28,6 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../../../App";
 import { auth, database } from "../../../firebase";
 import VehicleInfo from "../../components/VehicleInfo";
+import { getMotDetails } from "../../tools/getMotDetails";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -35,11 +36,10 @@ export type NavigationProp = NativeStackNavigationProp<
     "Vehicles"
 >;
 
-const newCarMotDate = (registeredDate: Date) => {
-    const regDate = new Date(registeredDate);
-    const motDate = new Date(
-        regDate.setFullYear(regDate.getFullYear() + 3)
-    ).toISOString();
+const newCarMotDate = async (numberPlate: string) => {
+    const res = await getMotDetails(numberPlate);
+
+    const motDate = new Date(res[0].motTestExpiryDate).toISOString();
 
     return motDate;
 };
@@ -123,16 +123,10 @@ const VehiclesScreen = ({ navigation }: any) => {
                 console.log(searchForVehicle);
 
                 newVehicle = {
-                    taxDate: searchForVehicle.taxDueDate
-                        ? new Date(searchForVehicle.taxDueDate).toISOString()
-                        : newCarMotDate(
-                              searchForVehicle.monthOfFirstRegistration
-                          ),
+                    taxDate: searchForVehicle.taxDueDate,
                     motDate: searchForVehicle.motExpiryDate
                         ? new Date(searchForVehicle.motExpiryDate).toISOString()
-                        : newCarMotDate(
-                              searchForVehicle.monthOfFirstRegistration
-                          ),
+                        : await newCarMotDate(numberPlate),
                     make: searchForVehicle.make,
                 };
 

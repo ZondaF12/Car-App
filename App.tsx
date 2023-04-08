@@ -12,6 +12,7 @@ import RegisterScreen from "./src/screens/AuthScreen/RegisterScreen";
 import SearchScreen from "./src/screens/SearchScreen/SearchScreen";
 import VehicleCheckScreen from "./src/screens/SearchScreen/VehicleCheckScreen";
 import VehicleMotScreen from "./src/screens/SearchScreen/VehicleMotScreen";
+import VehicleMotTestResultScreen from "./src/screens/SearchScreen/VehicleMotTestResultScreen";
 import VehicleTaxScreen from "./src/screens/SearchScreen/VehicleTaxScreen";
 import VehicleInfoScreen from "./src/screens/VehiclesScreen/VehicleInfoScreen";
 import VehiclesScreen from "./src/screens/VehiclesScreen/VehiclesScreen";
@@ -25,8 +26,9 @@ export type RootStackParamList = {
     Account: undefined;
     VehicleCheck: any;
     VehicleTax: any;
-    VehicleMot: undefined;
+    VehicleMot: any;
     VehicleInfo: any;
+    VehicleMotResults: any;
 };
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
@@ -164,6 +166,11 @@ const App = () => {
                 <Stack.Screen
                     name="VehicleInfo"
                     component={VehicleInfoScreen}
+                    options={{ headerShown: false, presentation: "modal" }}
+                />
+                <Stack.Screen
+                    name="VehicleMotResults"
+                    component={VehicleMotTestResultScreen}
                     options={{ headerShown: false, presentation: "modal" }}
                 />
             </Stack.Navigator>

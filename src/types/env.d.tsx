@@ -1,5 +1,6 @@
 declare module "@env" {
     export const DVLA_API: string;
+    export const DVSA_MOT_API_KEY: string;
     export const FIREBASE_API_KEY: string;
     export const FIREBASE_AUTH_DOMAIN: string;
     export const FIREBASE_PROJECT_ID: string;

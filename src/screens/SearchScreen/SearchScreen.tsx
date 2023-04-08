@@ -26,6 +26,13 @@ export type NavigationProp = NativeStackNavigationProp<
     "Search"
 >;
 
+export interface SearchHistoryType {
+    createdAt: Date;
+    make: string;
+    numberPlate: string;
+    yearOfManufacture: number;
+}
+
 const SearchScreen = ({ navigation }: any) => {
     const [searchHistory, setSearchHistory] = useState<any>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -46,22 +53,14 @@ const SearchScreen = ({ navigation }: any) => {
         });
     };
 
-    // useEffect(() => {
-    //     const unsubscribe = navigation.addListener("focus", async () => {
-    //         setIsLoading(true);
-    //         setSearchHistory([]);
-    //         await checkSearchHistory();
-    //         setIsLoading(false);
-    //     });
-
-    //     return unsubscribe;
-    // }, [navigation]);
-
     useEffect(() => {
+        setIsLoading(true);
         const q = query(
             collectionGroup(database, "searchHistory"),
             orderBy("createdAt", "desc")
         );
+
+        console.log(searchHistory);
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             setSearchHistory([]);
@@ -71,6 +70,7 @@ const SearchScreen = ({ navigation }: any) => {
                     vehicleHistory.concat(doc.data())
                 );
             });
+            setIsLoading(false);
         });
 
         return () => {

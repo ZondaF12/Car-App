@@ -1,16 +1,93 @@
-import { View, Text, SafeAreaView, TouchableOpacity } from "react-native";
-import React from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../../App";
-import MotSvgComponent from "../../../assets/MotSvg";
+import React, { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import { RootStackParamList } from "../../../App";
+import MotField from "../../components/MotField";
+import { getMotDetails } from "../../tools/getMotDetails";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
     "VehicleMot"
 >;
 
-const VehicleMotScreen = () => {
+const VehicleMotScreen = ({ route }: any) => {
+    const { motStatus, motExpiry, numberPlate } = route.params;
+    const [motTests, setMotTests] = useState<any>([]);
+    const [dayDifference, setDayDifference] = useState("");
+    const [carMotDate, setCarMotDate] = useState("");
+
+    useEffect(() => {
+        const checkMot = async () => {
+            const res = await getMotDetails(numberPlate);
+            setMotTests(res[0].motTests);
+
+            if (!motExpiry) {
+                const newCarDate = new Date(
+                    res[0].motTestExpiryDate
+                ).toDateString();
+                setCarMotDate(newCarDate);
+            } else {
+                const motDate = new Date(motExpiry).toDateString();
+                setCarMotDate(motDate);
+            }
+        };
+
+        checkMot();
+    }, []);
+
+    useEffect(() => {
+        const addMilageDifference = async () => {
+            let previousMilage;
+            for (let i = motTests.length - 1; i >= 0; i--) {
+                if (i === motTests.length - 1) {
+                    motTests[i]["milageDifference"] =
+                        motTests[i]["odometerValue"];
+                    previousMilage = motTests[i]["odometerValue"];
+                } else {
+                    if (motTests[i]["testResult"] === "PASSED") {
+                        motTests[i]["milageDifference"] =
+                            motTests[i]["odometerValue"] - previousMilage;
+
+                        previousMilage = motTests[i]["odometerValue"];
+                    }
+                }
+            }
+        };
+
+        addMilageDifference();
+    }, [motTests]);
+
+    useEffect(() => {
+        const dateDifference = async () => {
+            const date1 = new Date(carMotDate);
+            const date2 = new Date();
+
+            const difference = date1.getTime() - date2.getTime();
+            let days: any = await Promise.resolve(
+                Math.ceil(difference / (1000 * 3600 * 24))
+            );
+
+            setDayDifference(days);
+        };
+
+        dateDifference();
+    }, [carMotDate]);
+
+    if (!carMotDate) {
+        return (
+            <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
+                <ActivityIndicator size="large" color="#6c5dd2" />
+            </View>
+        );
+    }
+
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
             <View className="my-10">
@@ -21,23 +98,20 @@ const VehicleMotScreen = () => {
             <View className="w-[90%]">
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">MOT Status</Text>
-                    <Text className="text-white text-base">Valid</Text>
+                    <Text className="text-white text-base">{motStatus}</Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">Due Date</Text>
-                    <Text className="text-white text-base">
-                        31 October 2023
-                    </Text>
+                    <Text className="text-white text-base">{carMotDate}</Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">Expires</Text>
                     <Text className="text-white text-base">
-                        286 Days
-                        {/* {+dayDifference > 0
+                        {+dayDifference > 0
                             ? `${dayDifference} Days`
                             : +dayDifference < 0
                             ? `${+dayDifference * -1} Days Ago`
-                            : "N/A"} */}
+                            : "N/A"}
                     </Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4 mt-5">
@@ -53,75 +127,27 @@ const VehicleMotScreen = () => {
                 contentContainerStyle={{ alignItems: "center" }}
                 showsVerticalScrollIndicator={false}
             >
-                <View className="mt-8 space-y-4">
-                    <TouchableOpacity className="w-full bg-green-500 h-16 rounded-md flex-row">
-                        <View className="justify-center items-center px-4 ">
-                            <MotSvgComponent
-                                color={"#02A64F"}
-                                height={50}
-                                width={50}
+                <View className="mt-4">
+                    {motTests ? (
+                        motTests.map((motTest: any, i: any) => (
+                            <MotField
+                                motDate={motTest.completedDate}
+                                motTestStatus={motTest.testResult}
+                                totalMilage={motTest.odometerValue}
+                                latestTest={i === 0}
+                                milageDifference={motTest.milageDifference}
+                                motTestNumber={motTest.motTestNumber}
+                                expiryDate={motTest.expiryDate}
+                                comments={motTest.rfrAndComments}
                             />
-                        </View>
-                        <View className="justify-center pr-4">
-                            <Text className="text-base">21 Oct 2022</Text>
-                            <Text className="opacity-50">PASSED</Text>
-                        </View>
-                        <View className="justify-center ml-auto px-4">
-                            <Text className="text-base">48704 mi</Text>
-                            <Text className="opacity-50">+4967 mi</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="w-full bg-red-500 h-16 rounded-md flex-row opacity-50">
-                        <View className="justify-center items-center px-4 ">
-                            <MotSvgComponent
-                                color={"#D90000"}
-                                height={50}
-                                width={50}
-                            />
-                        </View>
-                        <View className="justify-center pr-4">
-                            <Text className="text-base">21 Oct 2022</Text>
-                            <Text className="opacity-50">FAILED</Text>
-                        </View>
-                        <View className="justify-center ml-auto px-4">
-                            <Text className="text-base">48704 mi</Text>
-                            <Text className="opacity-50"></Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="w-full bg-green-500 h-16 rounded-md flex-row opacity-50">
-                        <View className="justify-center items-center px-4 ">
-                            <MotSvgComponent
-                                color={"#02A64F"}
-                                height={50}
-                                width={50}
-                            />
-                        </View>
-                        <View className="justify-center pr-4">
-                            <Text className="text-base">17 Oct 2021</Text>
-                            <Text className="opacity-50">PASSED</Text>
-                        </View>
-                        <View className="justify-center ml-auto px-4">
-                            <Text className="text-base">41704 mi</Text>
-                            <Text className="opacity-50">+7398 mi</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="w-full bg-green-500 h-16 rounded-md flex-row opacity-50">
-                        <View className="justify-center items-center px-4 ">
-                            <MotSvgComponent
-                                color={"#02A64F"}
-                                height={50}
-                                width={50}
-                            />
-                        </View>
-                        <View className="justify-center pr-4">
-                            <Text className="text-base">12 Oct 2020</Text>
-                            <Text className="opacity-50">PASSED</Text>
-                        </View>
-                        <View className="justify-center ml-auto px-4">
-                            <Text className="text-base">36328 mi</Text>
-                            <Text className="opacity-50">+9273 mi</Text>
-                        </View>
-                    </TouchableOpacity>
+                        ))
+                    ) : (
+                        <TouchableOpacity className="items-center justify-center">
+                            <Text className="text-white text-lg">
+                                No MOT Tests Completed
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
