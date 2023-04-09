@@ -40,8 +40,8 @@ const VehicleInfo = ({
         let startDate: any = new Date(expiryDate);
         startDate = startDate.setFullYear(startDate.getFullYear() - 1);
 
-        const q = Math.abs(currentDate.getTime() - startDate);
-        const d = Math.abs(endDate - startDate);
+        const q = currentDate.getTime() - startDate;
+        const d = endDate - startDate;
 
         if (type === "MOT") {
             setMotPercent(Math.round((q / d) * 100));
@@ -82,20 +82,12 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={
-                        motPercent >= 83 && motPercent <= 100
-                            ? "#ff754c"
-                            : "#fff"
-                    }
+                    color={motPercent >= 83 ? "#ff754c" : "#fff"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
                     <MotSvgComponent
-                        color={
-                            motPercent >= 83 && motPercent <= 100
-                                ? "#ff754c"
-                                : "#fff"
-                        }
+                        color={motPercent >= 83 ? "#ff754c" : "#fff"}
                         height={24}
                         width={24}
                     />
@@ -113,11 +105,7 @@ const VehicleInfo = ({
                     <Entypo
                         name="shield"
                         size={24}
-                        color={
-                            taxPercent >= 83 && taxPercent <= 100
-                                ? "#ff754c"
-                                : "#fff"
-                        }
+                        color={taxPercent >= 83 ? "#ff754c" : "#fff"}
                     />
                 </ProgressCircle>
                 <ProgressCircle
@@ -135,11 +123,7 @@ const VehicleInfo = ({
                     <MaterialIcons
                         name="attach-money"
                         size={24}
-                        color={
-                            insurancePercent >= 83 && insurancePercent <= 100
-                                ? "#ff754c"
-                                : "#fff"
-                        }
+                        color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
                     />
                 </ProgressCircle>
             </View>

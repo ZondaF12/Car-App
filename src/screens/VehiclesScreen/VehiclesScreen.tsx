@@ -120,14 +120,21 @@ const VehiclesScreen = ({ navigation }: any) => {
             // Create New Vehicle
             try {
                 const searchForVehicle = await getVehicleDetails(numberPlate);
-                console.log(searchForVehicle);
+                const getExtraVehicleInfo = await getMotDetails(numberPlate);
 
                 newVehicle = {
-                    taxDate: searchForVehicle.taxDueDate,
+                    taxDate: searchForVehicle.taxDueDate
+                        ? searchForVehicle.taxDueDate
+                        : "SORN",
                     motDate: searchForVehicle.motExpiryDate
                         ? new Date(searchForVehicle.motExpiryDate).toISOString()
-                        : await newCarMotDate(numberPlate),
+                        : getExtraVehicleInfo[0].motTestExpiryDate
+                        ? new Date(
+                              getExtraVehicleInfo[0].motTestExpiryDate
+                          ).toISOString()
+                        : "",
                     make: searchForVehicle.make,
+                    model: getExtraVehicleInfo[0].model,
                 };
 
                 await setDoc(doc(database, "vehicles", numberPlate), {

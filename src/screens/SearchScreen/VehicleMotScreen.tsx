@@ -115,7 +115,9 @@ const VehicleMotScreen = ({ route }: any) => {
                     </Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4 mt-5">
-                    <Text className="text-white text-base">12 Month Tax</Text>
+                    <Text className="text-white text-base">
+                        MOT Test Pricing
+                    </Text>
                     <Text className="text-white text-base">£54</Text>
                 </View>
             </View>

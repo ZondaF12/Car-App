@@ -64,8 +64,6 @@ const RegisterScreen = () => {
 
             await sendEmailVerification(newUser.user);
 
-            console.log(newUser);
-
             // navigation.navigate("ConfirmEmail", { email: registerEmail });
         } catch (err: any) {
             Alert.alert(err.message);

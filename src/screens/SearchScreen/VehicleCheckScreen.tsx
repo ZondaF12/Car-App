@@ -129,8 +129,6 @@ const VehicleCheckScreen = ({ route }: any) => {
         );
     }
 
-    console.log(vehicleDetails);
-
     const newCarMotDate = (registeredDate: Date) => {
         const currentDate = new Date();
         const regDate = new Date(registeredDate);

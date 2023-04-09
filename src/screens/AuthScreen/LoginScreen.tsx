@@ -1,8 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-    BaseNavigationContainer,
-    useNavigation,
-} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
@@ -57,8 +54,6 @@ const LoginScreen = () => {
                 password
             );
 
-            console.log(user);
-
             navigation.navigate("Vehicles");
             setLoading(false);
         } catch (error: any) {
@@ -81,7 +76,6 @@ const LoginScreen = () => {
         try {
             const provider = new OAuthProvider("apple.com");
             const res = await signInWithPopup(auth, provider);
-            BaseNavigationContainer;
             console.log(res);
         } catch (error) {
             console.log(error);

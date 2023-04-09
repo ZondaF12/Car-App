@@ -42,8 +42,8 @@ const VehicleInfoScreen = ({ route }: any) => {
         let startDate: any = new Date(expiryDate);
         startDate = startDate.setFullYear(startDate.getFullYear() - 1);
 
-        const q = Math.abs(currentDate.getTime() - startDate);
-        const d = Math.abs(endDate - startDate);
+        const q = currentDate.getTime() - startDate;
+        const d = endDate - startDate;
 
         if (type === "MOT") {
             setMotPercent(Math.round((q / d) * 100));
@@ -113,11 +113,7 @@ const VehicleInfoScreen = ({ route }: any) => {
             <View className="w-full items-center space-y-4">
                 <View className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8">
                     <MotSvgComponent
-                        color={
-                            motPercent >= 75 && motPercent <= 100
-                                ? "#ff754c"
-                                : "#fff"
-                        }
+                        color={motPercent >= 83 ? "#ff754c" : "#fff"}
                         height={48}
                         width={48}
                     />
@@ -134,18 +130,16 @@ const VehicleInfoScreen = ({ route }: any) => {
                     <Entypo
                         name="shield"
                         size={48}
-                        color={
-                            taxPercent >= 75 && taxPercent <= 100
-                                ? "#ff754c"
-                                : "#fff"
-                        }
+                        color={taxPercent >= 83 ? "#ff754c" : "#fff"}
                     />
                     <View className="space-y-4">
                         <Text className="text-[#707175] text-base">
                             Tax Valid Until
                         </Text>
                         <Text className="text-2xl text-white">
-                            {new Date(taxDate).toDateString()}
+                            {taxDate === "SORN"
+                                ? taxDate
+                                : new Date(taxDate).toDateString()}
                         </Text>
                     </View>
                 </View>
@@ -153,7 +147,7 @@ const VehicleInfoScreen = ({ route }: any) => {
                     <MaterialIcons
                         name="attach-money"
                         size={48}
-                        color="white"
+                        color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
                     />
                     <View className="space-y-4">
                         <View className="flex-row items-center justify-between w-[90%]">
