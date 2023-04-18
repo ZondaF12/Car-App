@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
@@ -40,6 +41,7 @@ export interface SearchHistoryType {
 const SearchScreen = ({ navigation }: any) => {
     const [searchHistory, setSearchHistory] = useState<any>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchPlate, setSearchPlate] = useState("");
 
     const checkSearchHistory = async () => {
         const curUser = auth.currentUser!;
@@ -56,6 +58,10 @@ const SearchScreen = ({ navigation }: any) => {
             );
         });
     };
+
+    useEffect(() => {
+        setSearchPlate("");
+    }, [useIsFocused()]);
 
     useEffect(() => {
         const curUser = auth.currentUser!;
@@ -151,6 +157,10 @@ const SearchScreen = ({ navigation }: any) => {
                                 numberPlate: event.nativeEvent.text,
                             })
                         }
+                        value={searchPlate}
+                        onChangeText={(numberPlate) => {
+                            setSearchPlate(numberPlate);
+                        }}
                     ></TextInput>
                 </View>
             </View>
