@@ -157,6 +157,7 @@ const SearchScreen = ({ navigation }: any) => {
                                 numberPlate: event.nativeEvent.text,
                             })
                         }
+                        autoCorrect={false}
                         value={searchPlate}
                         onChangeText={(numberPlate) => {
                             setSearchPlate(numberPlate);

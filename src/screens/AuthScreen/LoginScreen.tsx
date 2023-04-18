@@ -11,7 +11,7 @@ import {
 import React, { useState } from "react";
 import {
     Alert,
-    SafeAreaView,
+    KeyboardAvoidingView,
     Text,
     TouchableOpacity,
     View,
@@ -83,7 +83,10 @@ const LoginScreen = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 justify-end bg-[#1e2128]">
+        <KeyboardAvoidingView
+            className="flex-1 justify-end bg-[#1e2128]"
+            behavior="padding"
+        >
             <View className="px-6">
                 <Text className="text-2xl font-semibold text-white mb-8 leading-10">
                     Hello There,{"\n"}Welcome Back
@@ -161,7 +164,7 @@ const LoginScreen = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
+        </KeyboardAvoidingView>
     );
 };
 
