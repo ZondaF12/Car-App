@@ -15,6 +15,7 @@ import {
     Image,
     ScrollView,
     Text,
+    TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -155,11 +156,27 @@ const VehicleCheckScreen = ({ route }: any) => {
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128]">
             <View className="items-center h-[86%]">
-                <View className="bg-white w-52 items-center justify-center h-12 rounded-lg top-3 z-20 shadow-2xl">
-                    <Text className="text-2xl font-bold uppercase">
-                        {route.params.numberPlate}
-                    </Text>
+                <View className="flex-row items-center justify-center">
+                    <View className="flex-1 justify-start items-start h-12 top-3">
+                        <TouchableOpacity
+                            className="pl-8 flex-1 items-center justify-center"
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Text className="text-white text-center text-3xl">
+                                &larr;
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View className="flex-1 items-center justify-center">
+                        <View className="bg-white w-52 items-center justify-center h-12 rounded-lg top-3 z-20 shadow-2xl">
+                            <Text className="text-2xl font-bold uppercase">
+                                {route.params.numberPlate}
+                            </Text>
+                        </View>
+                    </View>
+                    <View className="flex-1"></View>
                 </View>
+
                 <ScrollView
                     contentContainerStyle={{ alignItems: "center" }}
                     showsVerticalScrollIndicator={false}
