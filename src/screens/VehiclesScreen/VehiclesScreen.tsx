@@ -10,12 +10,14 @@ import {
     orderBy,
     query,
     setDoc,
+    updateDoc,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
     Modal,
+    RefreshControl,
     ScrollView,
     Text,
     TextInput,
@@ -47,6 +49,7 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [userVehicles, setUserVehicles] = useState<any>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
@@ -93,13 +96,15 @@ const VehiclesScreen = ({ navigation }: any) => {
         setModalVisible(false);
         const curUser = auth.currentUser!;
 
+        const vehicleRegPlate = numberPlate.replace(/\s/g, "");
+
         // Check if we already have that vehicle added
         const userVehicleDoc = doc(
             database,
             "users",
             curUser?.uid,
             "userVehicles",
-            numberPlate
+            vehicleRegPlate
         );
         const userVehicleDuplicateQuery = await getDoc(userVehicleDoc);
 
@@ -110,17 +115,21 @@ const VehiclesScreen = ({ navigation }: any) => {
         }
 
         // Create new Vehicle if it doesnt already exist
-        const vehicleDoc = doc(database, "vehicles", numberPlate);
+        const vehicleDoc = doc(database, "vehicles", vehicleRegPlate);
         const q = await getDoc(vehicleDoc);
 
         let newVehicle;
-        if (q.data()) {
-            console.log("Vehicle Already Exists");
-        } else {
-            // Create New Vehicle
-            try {
-                const searchForVehicle = await getVehicleDetails(numberPlate);
-                const getExtraVehicleInfo = await getMotDetails(numberPlate);
+        try {
+            if (q.data()) {
+                console.log("Vehicle Already Exists");
+            } else {
+                // Create New Vehicle
+                const searchForVehicle = await getVehicleDetails(
+                    vehicleRegPlate
+                );
+                const getExtraVehicleInfo = await getMotDetails(
+                    vehicleRegPlate
+                );
 
                 newVehicle = {
                     taxDate: searchForVehicle.taxDueDate
@@ -137,43 +146,101 @@ const VehiclesScreen = ({ navigation }: any) => {
                     model: getExtraVehicleInfo[0].model,
                 };
 
-                await setDoc(doc(database, "vehicles", numberPlate), {
+                await setDoc(doc(database, "vehicles", vehicleRegPlate), {
                     ...newVehicle,
-                    numberPlate: numberPlate,
+                    numberPlate: vehicleRegPlate,
                 });
-            } catch (error: any) {
-                console.error(error);
-                setIsLoading(false);
-                Alert.alert(error.errors[0].message);
             }
-        }
-        // Add the vehicle to the user
-        if (!userVehicleDuplicateQuery.data()) {
-            let addVehicle;
-            if (q.data()) {
-                addVehicle = q.data();
-            } else {
-                addVehicle = newVehicle;
-            }
-            await setDoc(
-                doc(
-                    database,
-                    "users",
-                    curUser?.uid,
-                    "userVehicles",
-                    numberPlate
-                ),
-                {
-                    ...addVehicle,
-                    createdAt: new Date().toISOString(),
-                    numberPlate: numberPlate,
+            // Add the vehicle to the user
+            if (!userVehicleDuplicateQuery.data()) {
+                let addVehicle;
+                if (q.data()) {
+                    addVehicle = q.data();
+                } else {
+                    addVehicle = newVehicle;
                 }
-            );
+                await setDoc(
+                    doc(
+                        database,
+                        "users",
+                        curUser?.uid,
+                        "userVehicles",
+                        vehicleRegPlate
+                    ),
+                    {
+                        ...addVehicle,
+                        createdAt: new Date().toISOString(),
+                        numberPlate: vehicleRegPlate,
+                    }
+                );
+            }
+            // refresh the screen to display the new vehicle
+            await checkUserVehicles();
+            setIsLoading(false);
+        } catch (error: any) {
+            Alert.alert(`${vehicleRegPlate} is an invalid plate`);
+            console.error(error);
+            setIsLoading(false);
         }
+    };
 
-        // refresh the screen to display the new vehicle
-        await checkUserVehicles();
-        setIsLoading(false);
+    const onRefreshVehicleDetails = async () => {
+        setRefreshing(true);
+
+        for (let vehicle in userVehicles) {
+            try {
+                const res = await getVehicleDetails(
+                    userVehicles[vehicle].numberPlate
+                );
+
+                let newMotDate = new Date(res.motExpiryDate);
+                const newTaxDate = new Date(res.taxDueDate);
+
+                if (!res.motExpiryDate) {
+                    const motRes = await getMotDetails(
+                        userVehicles[vehicle].numberPlate
+                    );
+                    newMotDate = new Date(motRes[0].motTestExpiryDate);
+                }
+
+                const currentTaxDate = new Date(userVehicles[vehicle].taxDate);
+                const currentMotDate = new Date(userVehicles[vehicle].motDate);
+
+                const updateDates =
+                    newTaxDate.getTime() != currentTaxDate.getTime() ||
+                    newMotDate.getTime() != currentMotDate.getTime();
+
+                if (updateDates) {
+                    const curUser = auth.currentUser!;
+                    const userVehicleDoc = doc(
+                        database,
+                        "users",
+                        curUser?.uid,
+                        "userVehicles",
+                        userVehicles[vehicle].numberPlate
+                    );
+
+                    const vehicleDoc = doc(
+                        database,
+                        "vehicles",
+                        userVehicles[vehicle].numberPlate
+                    );
+
+                    await updateDoc(userVehicleDoc, {
+                        motDate: newMotDate,
+                        taxDate: newTaxDate,
+                    });
+
+                    await updateDoc(vehicleDoc, {
+                        motDate: newMotDate,
+                        taxDate: newTaxDate,
+                    });
+                }
+            } catch (error) {
+                setRefreshing(false);
+            }
+        }
+        setRefreshing(false);
     };
 
     const vehcileInfoClicked = async (
@@ -271,6 +338,13 @@ const VehiclesScreen = ({ navigation }: any) => {
                 className="w-[90%] space-y-4"
                 contentInsetAdjustmentBehavior="automatic"
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefreshVehicleDetails}
+                        tintColor="#fff"
+                    />
+                }
             >
                 {userVehicles.length > 0 ? (
                     userVehicles.map((vehicle: any) => (

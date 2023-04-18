@@ -1,6 +1,6 @@
-import { View, Text, SafeAreaView, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useEffect, useState } from "react";
+import { SafeAreaView, Text, View } from "react-native";
 import { RootStackParamList } from "../../../App";
 import TaxTable from "../../components/TaxTable";
 
@@ -113,7 +113,7 @@ const VehicleTaxScreen = ({ route }: any) => {
             </View>
             <TaxTable emissions={co2Emissions} />
             <View className="flex-row justify-between w-[90%] px-4 py-2 bg-[#33343b]">
-                <Text className="text-white text-base">Co2 Emissions</Text>
+                <Text className="text-white text-base">CO2 Emissions</Text>
                 <Text className="text-white text-base">
                     {co2Emissions} g/km
                 </Text>

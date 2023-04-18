@@ -85,13 +85,26 @@ const VehicleCheckScreen = ({ route }: any) => {
 
     useEffect(() => {
         const onGetVehicleDetails = async () => {
-            const res = await getVehicleDetails(vehicleRegPlate);
-            setVehicleDetails(res);
+            try {
+                const res = await getVehicleDetails(vehicleRegPlate);
+                setVehicleDetails(res);
+            } catch (e: any) {
+                navigation.goBack();
+                Alert.alert(
+                    `${vehicleRegPlate} is not a valid number plate`,
+                    e.message
+                );
+            }
         };
 
         const onGetVehicleImage = async () => {
-            const res = await getVehicleImage(vehicleRegPlate);
-            setVehicleImage(res);
+            try {
+                const res = await getVehicleImage(vehicleRegPlate);
+                setVehicleImage(res);
+            } catch (error: any) {
+                navigation.goBack();
+                Alert.alert(`error`, error.message);
+            }
         };
 
         onGetVehicleDetails();
