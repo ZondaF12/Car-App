@@ -156,7 +156,7 @@ const VehicleCheckScreen = ({ route }: any) => {
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128]">
             <View className="items-center h-[86%]">
-                <View className="flex-row items-center justify-center">
+                <View className="flex-row items-center justify-center z-20">
                     <View className="flex-1 justify-start items-start h-12 top-3">
                         <TouchableOpacity
                             className="pl-8 flex-1 items-center justify-center"
