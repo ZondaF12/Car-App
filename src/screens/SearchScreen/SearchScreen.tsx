@@ -1,6 +1,9 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
+    deleteDoc,
+    doc,
     getDocs,
     onSnapshot,
     orderBy,
@@ -9,9 +12,11 @@ import {
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     ScrollView,
     Text,
     TextInput,
+    TouchableOpacity,
     View,
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
@@ -77,6 +82,39 @@ const SearchScreen = ({ navigation }: any) => {
         };
     }, []);
 
+    const onClearSearchHistory = async () => {
+        Alert.alert(
+            "Deleting a Vehicle",
+            `Are you sure you want to clear your search history?`,
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Clear",
+                    style: "destructive",
+                    onPress: () => clearSearchHistory(),
+                },
+            ]
+        );
+    };
+
+    const clearSearchHistory = async () => {
+        const curUser = auth.currentUser!;
+        for (let vehicle in searchHistory) {
+            await deleteDoc(
+                doc(
+                    database,
+                    "users",
+                    curUser.uid,
+                    "searchHistory",
+                    searchHistory[vehicle].numberPlate
+                )
+            );
+        }
+    };
+
     if (isLoading) {
         return (
             <SafeAreaView className="flex-1 bg-[#1e2128] items-center justify-center">
@@ -117,8 +155,22 @@ const SearchScreen = ({ navigation }: any) => {
                 </View>
             </View>
             <View className="w-[90%] max-h-[75%] shadow-xl rounded-lg bg-[#242731]">
-                <View className="px-6 py-6">
-                    <Text className="text-white text-xl">Search History</Text>
+                <View className="flex-row justify-between">
+                    <View className="px-6 py-6">
+                        <Text className="text-white text-xl">
+                            Search History
+                        </Text>
+                    </View>
+                    {searchHistory.length > 0 ? (
+                        <TouchableOpacity onPress={onClearSearchHistory}>
+                            <MaterialIcons
+                                name="delete"
+                                size={28}
+                                color="white"
+                                style={{ padding: 24 }}
+                            />
+                        </TouchableOpacity>
+                    ) : null}
                 </View>
                 <ScrollView
                     contentContainerStyle={{
