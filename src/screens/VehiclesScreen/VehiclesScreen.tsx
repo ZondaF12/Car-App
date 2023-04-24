@@ -1,17 +1,12 @@
 import "@azure/core-asynciterator-polyfill";
 import { AntDesign } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Notifications from "expo-notifications";
 import {
     collection,
-    doc,
-    getDoc,
     getDocs,
     onSnapshot,
     orderBy,
     query,
-    setDoc,
-    updateDoc,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -30,47 +25,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../../../App";
 import { auth, database } from "../../../firebase";
 import VehicleInfo from "../../components/VehicleInfo";
-import { getMotDetails } from "../../tools/getMotDetails";
-import { getVehicleDetails } from "../../tools/getVehicleDetails";
+import addNewVehicle from "../../tools/addNewVehicle";
+import refreshVehicleDetails from "../../tools/refreshVehicleDetails";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
     "Vehicles"
 >;
-
-const schedulePushNotification = async (
-    numberPlate: string,
-    type: string,
-    expiryDate: any
-) => {
-    if (!expiryDate || expiryDate === "SORN") {
-        return;
-    }
-
-    const formattedExpiryDate = new Date(expiryDate);
-
-    let date = new Date(expiryDate);
-    date.setDate(date.getDate() - 30);
-    date.setHours(8);
-
-    const triggerDate: Date = new Date(date);
-
-    const newNotification = await Notifications.scheduleNotificationAsync({
-        content: {
-            title: type === "TAX" ? "Vehicle Tax Expiring soon" : "MOT Due",
-            body:
-                type === "TAX"
-                    ? `${numberPlate}'s TAX expires within 30 days (${formattedExpiryDate.toDateString()})`
-                    : `${numberPlate} is due for an MOT within the next 30 days (${formattedExpiryDate.toDateString()})`,
-        },
-        trigger:
-            triggerDate < new Date()
-                ? new Date().setSeconds(new Date().getSeconds() + 2)
-                : triggerDate,
-    });
-
-    return newNotification;
-};
 
 const VehiclesScreen = ({ navigation }: any) => {
     const [userVehicles, setUserVehicles] = useState<any>([]);
@@ -118,217 +79,19 @@ const VehiclesScreen = ({ navigation }: any) => {
         };
     }, []);
 
-    const addNewVehicle = async (numberPlate: string) => {
+    const onAddNewVehicle = async (numberPlate: string) => {
         setIsLoading(true);
         setModalVisible(false);
-        const curUser = auth.currentUser!;
 
-        const vehicleRegPlate = numberPlate.replace(/\s/g, "");
+        await addNewVehicle(numberPlate);
 
-        // Check if we already have that vehicle added
-        const userVehicleDoc = doc(
-            database,
-            "users",
-            curUser?.uid,
-            "userVehicles",
-            vehicleRegPlate
-        );
-        const userVehicleDuplicateQuery = await getDoc(userVehicleDoc);
-
-        if (userVehicleDuplicateQuery.data()) {
-            Alert.alert("Vehicle already Added");
-            setIsLoading(false);
-            return;
-        }
-
-        // Create new Vehicle if it doesnt already exist
-        const vehicleDoc = doc(database, "vehicles", vehicleRegPlate);
-        const q = await getDoc(vehicleDoc);
-
-        let newVehicle;
-        try {
-            if (q.data()) {
-                console.log("Vehicle Already Exists");
-            } else {
-                // Create New Vehicle
-                const searchForVehicle = await getVehicleDetails(
-                    vehicleRegPlate
-                );
-                const getExtraVehicleInfo = await getMotDetails(
-                    vehicleRegPlate
-                );
-
-                newVehicle = {
-                    taxDate: searchForVehicle.taxDueDate
-                        ? searchForVehicle.taxDueDate
-                        : "SORN",
-                    motDate: searchForVehicle.motExpiryDate
-                        ? new Date(searchForVehicle.motExpiryDate).toISOString()
-                        : getExtraVehicleInfo[0].motTestExpiryDate
-                        ? new Date(
-                              getExtraVehicleInfo[0].motTestExpiryDate
-                          ).toISOString()
-                        : "",
-                    make: searchForVehicle.make,
-                    model: getExtraVehicleInfo[0].model,
-                };
-
-                await setDoc(doc(database, "vehicles", vehicleRegPlate), {
-                    ...newVehicle,
-                    numberPlate: vehicleRegPlate,
-                });
-            }
-            // Add the vehicle to the user
-            if (!userVehicleDuplicateQuery.data()) {
-                let addVehicle;
-                if (q.data()) {
-                    addVehicle = q.data();
-                } else {
-                    addVehicle = newVehicle;
-                }
-
-                const setTaxNotification = await schedulePushNotification(
-                    numberPlate,
-                    "TAX",
-                    addVehicle?.taxDate
-                );
-
-                const setMotNotification = await schedulePushNotification(
-                    numberPlate,
-                    "MOT",
-                    addVehicle?.motDate
-                );
-
-                await setDoc(
-                    doc(
-                        database,
-                        "users",
-                        curUser?.uid,
-                        "userVehicles",
-                        vehicleRegPlate
-                    ),
-                    {
-                        ...addVehicle,
-                        createdAt: new Date().toISOString(),
-                        numberPlate: vehicleRegPlate,
-                        taxNotification: setTaxNotification
-                            ? setTaxNotification
-                            : "",
-                        motNotification: setMotNotification
-                            ? setMotNotification
-                            : "",
-                    }
-                );
-            }
-            // refresh the screen to display the new vehicle
-            await checkUserVehicles();
-            setIsLoading(false);
-        } catch (error: any) {
-            Alert.alert(`${vehicleRegPlate} is an invalid plate`);
-            console.error(error);
-            setIsLoading(false);
-        }
+        await checkUserVehicles();
+        setIsLoading(false);
     };
 
     const onRefreshVehicleDetails = async () => {
         setRefreshing(true);
-
-        for (let vehicle in userVehicles) {
-            try {
-                const res = await getVehicleDetails(
-                    userVehicles[vehicle].numberPlate
-                );
-
-                let newMotDate = new Date(res.motExpiryDate);
-                const newTaxDate = new Date(res.taxDueDate);
-
-                if (!res.motExpiryDate) {
-                    const motRes = await getMotDetails(
-                        userVehicles[vehicle].numberPlate
-                    );
-                    newMotDate = new Date(motRes[0].motTestExpiryDate);
-                }
-
-                const currentTaxDate = new Date(userVehicles[vehicle].taxDate);
-                const currentMotDate = new Date(userVehicles[vehicle].motDate);
-
-                /* If either dates do not match this will be true */
-                const taxDateChanged =
-                    newTaxDate.getTime() != currentTaxDate.getTime();
-
-                const motDateChanged =
-                    newMotDate.getTime() != currentMotDate.getTime();
-
-                /* If true this will then update the values that have been stored */
-                if (taxDateChanged || motDateChanged) {
-                    const curUser = auth.currentUser!;
-                    const userVehicleDoc = doc(
-                        database,
-                        "users",
-                        curUser?.uid,
-                        "userVehicles",
-                        userVehicles[vehicle].numberPlate
-                    );
-
-                    const userVehicleQuery = await getDoc(userVehicleDoc);
-                    const userVehicleData = userVehicleQuery.data();
-
-                    let motNotification;
-                    if (motDateChanged) {
-                        if (userVehicleData?.motNotification) {
-                            await Notifications.cancelScheduledNotificationAsync(
-                                userVehicleData?.motNotification
-                            );
-                        }
-
-                        motNotification = await schedulePushNotification(
-                            userVehicles[vehicle].numberPlate,
-                            "MOT",
-                            newMotDate
-                        );
-                    }
-
-                    let taxNotification;
-                    if (taxDateChanged) {
-                        if (userVehicleData?.taxNotification) {
-                            await Notifications.cancelScheduledNotificationAsync(
-                                userVehicleData?.taxNotification
-                            );
-                        }
-
-                        taxNotification = await schedulePushNotification(
-                            userVehicles[vehicle].numberPlate,
-                            "TAX",
-                            newTaxDate
-                        );
-                    }
-
-                    const vehicleDoc = doc(
-                        database,
-                        "vehicles",
-                        userVehicles[vehicle].numberPlate
-                    );
-
-                    await updateDoc(userVehicleDoc, {
-                        motDate: newMotDate,
-                        taxDate: newTaxDate,
-                        taxNotification: taxNotification
-                            ? taxNotification
-                            : userVehicleData?.taxNotification,
-                        motNotification: motNotification
-                            ? motNotification
-                            : userVehicleData?.motNotification,
-                    });
-
-                    await updateDoc(vehicleDoc, {
-                        motDate: newMotDate,
-                        taxDate: newTaxDate,
-                    });
-                }
-            } catch (error) {
-                setRefreshing(false);
-            }
-        }
+        await refreshVehicleDetails(userVehicles);
         setRefreshing(false);
     };
 
@@ -412,11 +175,11 @@ const VehiclesScreen = ({ navigation }: any) => {
                                         style={{ fontSize: 18 }}
                                         autoCapitalize={"characters"}
                                         autoCorrect={false}
-                                        onSubmitEditing={(event) =>
-                                            addNewVehicle(
+                                        onSubmitEditing={(event) => {
+                                            onAddNewVehicle(
                                                 event.nativeEvent.text
-                                            )
-                                        }
+                                            );
+                                        }}
                                     ></TextInput>
                                 </View>
                             </View>

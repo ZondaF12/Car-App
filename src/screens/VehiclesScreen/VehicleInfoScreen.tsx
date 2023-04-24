@@ -16,39 +16,12 @@ import { RootStackParamList } from "../../../App";
 import MotSvgComponent from "../../../assets/MotSvg";
 import { auth, database } from "../../../firebase";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
+import schedulePushNotification from "../../tools/notifications/scheduleNotification";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
     "VehicleInfo"
 >;
-
-const schedulePushNotification = async (
-    numberPlate: string,
-    expiryDate: any
-) => {
-    const formattedExpiryDate = new Date(expiryDate);
-
-    let date = new Date(expiryDate);
-    date.setDate(date.getDate() - 30);
-    date.setHours(8);
-
-    const triggerDate: Date = new Date(date);
-
-    const newNotification = await Notifications.scheduleNotificationAsync({
-        content: {
-            title: "Vehicle Insurance Expiring soon",
-            body: `Your insurance for ${numberPlate} expires ${
-                triggerDate < new Date() ? "within" : "in"
-            } 30 days (${formattedExpiryDate.toDateString()})`,
-        },
-        trigger:
-            triggerDate < new Date()
-                ? new Date().setSeconds(new Date().getSeconds() + 2)
-                : triggerDate,
-    });
-
-    return newNotification;
-};
 
 const VehicleInfoScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
