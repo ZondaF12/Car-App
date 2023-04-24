@@ -1,9 +1,21 @@
 import { Entypo, Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
+
+async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+        content: {
+            title: "Test Notification",
+            body: "Here is the notification body",
+            data: { data: "goes here" },
+        },
+        trigger: { seconds: 2 },
+    });
+}
 
 const AccountScreen = () => {
     const [user, setUser] = useState<any>("");
@@ -49,7 +61,10 @@ const AccountScreen = () => {
                         </Text>
                         <Text className="text-[#707175]">Personal Info</Text>
                     </View>
-                    <TouchableOpacity className="bg-[#707175] w-12 h-12 opacity-50 items-center justify-center rounded-xl ml-auto">
+                    <TouchableOpacity
+                        className="bg-[#707175] w-12 h-12 opacity-50 items-center justify-center rounded-xl ml-auto"
+                        onPress={schedulePushNotification}
+                    >
                         <Entypo name="chevron-right" size={20} color="white" />
                     </TouchableOpacity>
                 </View>

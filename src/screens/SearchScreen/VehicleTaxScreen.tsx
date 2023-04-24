@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, Text, View } from "react-native";
 import { RootStackParamList } from "../../../App";
 import TaxTable from "../../components/TaxTable";
 
@@ -76,6 +76,14 @@ const VehicleTaxScreen = ({ route }: any) => {
         dateConverter(dueDate);
         dateDifference(dueDate);
     }, []);
+
+    if (!dayDifference) {
+        return (
+            <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
+                <ActivityIndicator size="large" color="#6c5dd2" />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">

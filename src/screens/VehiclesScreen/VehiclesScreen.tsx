@@ -1,6 +1,7 @@
 import "@azure/core-asynciterator-polyfill";
 import { AntDesign } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Notifications from "expo-notifications";
 import {
     collection,
     doc,
@@ -37,12 +38,38 @@ export type NavigationProp = NativeStackNavigationProp<
     "Vehicles"
 >;
 
-const newCarMotDate = async (numberPlate: string) => {
-    const res = await getMotDetails(numberPlate);
+const schedulePushNotification = async (
+    numberPlate: string,
+    type: string,
+    expiryDate: any
+) => {
+    if (!expiryDate || expiryDate === "SORN") {
+        return;
+    }
 
-    const motDate = new Date(res[0].motTestExpiryDate).toISOString();
+    const formattedExpiryDate = new Date(expiryDate);
 
-    return motDate;
+    let date = new Date(expiryDate);
+    date.setDate(date.getDate() - 30);
+    date.setHours(8);
+
+    const triggerDate: Date = new Date(date);
+
+    const newNotification = await Notifications.scheduleNotificationAsync({
+        content: {
+            title: type === "TAX" ? "Vehicle Tax Expiring soon" : "MOT Due",
+            body:
+                type === "TAX"
+                    ? `${numberPlate}'s TAX expires within 30 days (${formattedExpiryDate.toDateString()})`
+                    : `${numberPlate} is due for an MOT within the next 30 days (${formattedExpiryDate.toDateString()})`,
+        },
+        trigger:
+            triggerDate < new Date()
+                ? new Date().setSeconds(new Date().getSeconds() + 2)
+                : triggerDate,
+    });
+
+    return newNotification;
 };
 
 const VehiclesScreen = ({ navigation }: any) => {
@@ -159,6 +186,19 @@ const VehiclesScreen = ({ navigation }: any) => {
                 } else {
                     addVehicle = newVehicle;
                 }
+
+                const setTaxNotification = await schedulePushNotification(
+                    numberPlate,
+                    "TAX",
+                    addVehicle?.taxDate
+                );
+
+                const setMotNotification = await schedulePushNotification(
+                    numberPlate,
+                    "MOT",
+                    addVehicle?.motDate
+                );
+
                 await setDoc(
                     doc(
                         database,
@@ -171,6 +211,12 @@ const VehiclesScreen = ({ navigation }: any) => {
                         ...addVehicle,
                         createdAt: new Date().toISOString(),
                         numberPlate: vehicleRegPlate,
+                        taxNotification: setTaxNotification
+                            ? setTaxNotification
+                            : "",
+                        motNotification: setMotNotification
+                            ? setMotNotification
+                            : "",
                     }
                 );
             }
@@ -322,6 +368,7 @@ const VehiclesScreen = ({ navigation }: any) => {
                                         placeholder="AA00 AAA"
                                         style={{ fontSize: 18 }}
                                         autoCapitalize={"characters"}
+                                        autoCorrect={false}
                                         onSubmitEditing={(event) =>
                                             addNewVehicle(
                                                 event.nativeEvent.text

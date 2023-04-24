@@ -1,7 +1,8 @@
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import * as Notifications from "expo-notifications";
+import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -14,11 +15,40 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../../App";
 import MotSvgComponent from "../../../assets/MotSvg";
 import { auth, database } from "../../../firebase";
+import { getVehicleDetails } from "../../tools/getVehicleDetails";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
     "VehicleInfo"
 >;
+
+const schedulePushNotification = async (
+    numberPlate: string,
+    expiryDate: any
+) => {
+    const formattedExpiryDate = new Date(expiryDate);
+
+    let date = new Date(expiryDate);
+    date.setDate(date.getDate() - 30);
+    date.setHours(8);
+
+    const triggerDate: Date = new Date(date);
+
+    const newNotification = await Notifications.scheduleNotificationAsync({
+        content: {
+            title: "Vehicle Insurance Expiring soon",
+            body: `Your insurance for ${numberPlate} expires ${
+                triggerDate < new Date() ? "within" : "in"
+            } 30 days (${formattedExpiryDate.toDateString()})`,
+        },
+        trigger:
+            triggerDate < new Date()
+                ? new Date().setSeconds(new Date().getSeconds() + 2)
+                : triggerDate,
+    });
+
+    return newNotification;
+};
 
 const VehicleInfoScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
@@ -28,11 +58,19 @@ const VehicleInfoScreen = ({ route }: any) => {
     const [taxPercent, setTaxPercent] = useState<any>();
     const [insurancePercent, setInsurancePercent] = useState<any>();
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [taxInfo, setTaxInfo] = useState<any>();
 
     useEffect(() => {
         dateConverter(motDate, "MOT");
         dateConverter(taxDate, "TAX");
         dateConverter(insuranceDate, "Insurance");
+
+        const vehicleInfo = async () => {
+            const vehicleSearch = await getVehicleDetails(numberPlate);
+            setTaxInfo(vehicleSearch);
+        };
+
+        vehicleInfo();
     }, []);
 
     const dateConverter = async (expiryDate: Date, type: string) => {
@@ -71,8 +109,37 @@ const VehicleInfoScreen = ({ route }: any) => {
             ]
         );
     };
+
     const deleteVehicleFromGarage = async () => {
         const curUser = auth.currentUser!;
+
+        const userVehicleDoc = doc(
+            database,
+            "users",
+            curUser?.uid,
+            "userVehicles",
+            numberPlate
+        );
+        const userVehicleQuery = await getDoc(userVehicleDoc);
+        const userVehicleData = userVehicleQuery.data();
+
+        if (userVehicleData?.motNotification) {
+            await Notifications.cancelScheduledNotificationAsync(
+                userVehicleData?.motNotification
+            );
+        }
+
+        if (userVehicleData?.taxNotification) {
+            await Notifications.cancelScheduledNotificationAsync(
+                userVehicleData?.taxNotification
+            );
+        }
+
+        if (userVehicleData?.insuranceNotification) {
+            await Notifications.cancelScheduledNotificationAsync(
+                userVehicleData?.insuranceNotification
+            );
+        }
 
         await deleteDoc(
             doc(database, "users", curUser.uid, "userVehicles", numberPlate)
@@ -93,11 +160,42 @@ const VehicleInfoScreen = ({ route }: any) => {
             numberPlate
         );
 
+        const userVehicleQuery = await getDoc(userVehicleDoc);
+        const userVehicleData = userVehicleQuery.data();
+
+        const setInsuranceNotification = await schedulePushNotification(
+            numberPlate,
+            date
+        );
+
+        if (userVehicleData?.insuranceNotification) {
+            await Notifications.cancelScheduledNotificationAsync(
+                userVehicleData?.insuranceNotification
+            );
+        }
+
         await updateDoc(userVehicleDoc, {
             insuranceDate: new Date(date).toISOString(),
+            insuranceNotification: setInsuranceNotification,
         });
 
         setIsDatePickerVisible(false);
+    };
+
+    const onMotPress = async () => {
+        navigation.navigate("VehicleMot", {
+            motStatus: taxPercent < 100 ? "Valid" : "Not Valid",
+            motExpiry: motDate,
+            numberPlate: numberPlate,
+        });
+    };
+    const onTaxPress = async () => {
+        navigation.navigate("VehicleTax", {
+            taxStatus: taxInfo.taxStatus,
+            dueDate: taxDate,
+            co2Emissions: taxInfo.co2Emissions,
+            registered: taxInfo.monthOfFirstRegistration,
+        });
     };
 
     return (
@@ -111,7 +209,10 @@ const VehicleInfoScreen = ({ route }: any) => {
                 </TouchableOpacity>
             </View>
             <View className="w-full items-center space-y-4">
-                <View className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8">
+                <TouchableOpacity
+                    className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8"
+                    onPress={onMotPress}
+                >
                     <MotSvgComponent
                         color={motPercent >= 83 ? "#ff754c" : "#fff"}
                         height={48}
@@ -125,8 +226,11 @@ const VehicleInfoScreen = ({ route }: any) => {
                             {new Date(motDate).toDateString()}
                         </Text>
                     </View>
-                </View>
-                <View className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8">
+                </TouchableOpacity>
+                <TouchableOpacity
+                    className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8"
+                    onPress={onTaxPress}
+                >
                     <Entypo
                         name="shield"
                         size={48}
@@ -142,7 +246,7 @@ const VehicleInfoScreen = ({ route }: any) => {
                                 : new Date(taxDate).toDateString()}
                         </Text>
                     </View>
-                </View>
+                </TouchableOpacity>
                 <View className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8">
                     <MaterialIcons
                         name="attach-money"
