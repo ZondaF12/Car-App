@@ -252,11 +252,15 @@ const VehiclesScreen = ({ navigation }: any) => {
                 const currentTaxDate = new Date(userVehicles[vehicle].taxDate);
                 const currentMotDate = new Date(userVehicles[vehicle].motDate);
 
-                const updateDates =
-                    newTaxDate.getTime() != currentTaxDate.getTime() ||
+                /* If either dates do not match this will be true */
+                const taxDateChanged =
+                    newTaxDate.getTime() != currentTaxDate.getTime();
+
+                const motDateChanged =
                     newMotDate.getTime() != currentMotDate.getTime();
 
-                if (updateDates) {
+                /* If true this will then update the values that have been stored */
+                if (taxDateChanged || motDateChanged) {
                     const curUser = auth.currentUser!;
                     const userVehicleDoc = doc(
                         database,
@@ -265,6 +269,39 @@ const VehiclesScreen = ({ navigation }: any) => {
                         "userVehicles",
                         userVehicles[vehicle].numberPlate
                     );
+
+                    const userVehicleQuery = await getDoc(userVehicleDoc);
+                    const userVehicleData = userVehicleQuery.data();
+
+                    let motNotification;
+                    if (motDateChanged) {
+                        if (userVehicleData?.motNotification) {
+                            await Notifications.cancelScheduledNotificationAsync(
+                                userVehicleData?.motNotification
+                            );
+                        }
+
+                        motNotification = await schedulePushNotification(
+                            userVehicles[vehicle].numberPlate,
+                            "MOT",
+                            newMotDate
+                        );
+                    }
+
+                    let taxNotification;
+                    if (taxDateChanged) {
+                        if (userVehicleData?.taxNotification) {
+                            await Notifications.cancelScheduledNotificationAsync(
+                                userVehicleData?.taxNotification
+                            );
+                        }
+
+                        taxNotification = await schedulePushNotification(
+                            userVehicles[vehicle].numberPlate,
+                            "TAX",
+                            newTaxDate
+                        );
+                    }
 
                     const vehicleDoc = doc(
                         database,
@@ -275,6 +312,12 @@ const VehiclesScreen = ({ navigation }: any) => {
                     await updateDoc(userVehicleDoc, {
                         motDate: newMotDate,
                         taxDate: newTaxDate,
+                        taxNotification: taxNotification
+                            ? taxNotification
+                            : userVehicleData?.taxNotification,
+                        motNotification: motNotification
+                            ? motNotification
+                            : userVehicleData?.motNotification,
                     });
 
                     await updateDoc(vehicleDoc, {

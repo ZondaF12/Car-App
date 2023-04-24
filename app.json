@@ -2,7 +2,7 @@
     "expo": {
         "name": "My Pocket Garage",
         "slug": "my-car-app",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.zondaf12.mycarapp",
-            "buildNumber": "8"
+            "buildNumber": "9"
         },
         "android": {
             "adaptiveIcon": {
