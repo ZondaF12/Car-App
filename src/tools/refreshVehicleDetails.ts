@@ -91,9 +91,12 @@ const refreshVehicleDetails = async (userVehicles: any) => {
 
                 /* Update the firebase docs with the new dates and
                  * notification id's if they have changed */
+
+                console.log(newMotDate.toISOString());
+
                 await updateDoc(userVehicleDoc, {
-                    motDate: newMotDate,
-                    taxDate: newTaxDate,
+                    motDate: newMotDate.toISOString(),
+                    taxDate: newTaxDate.toISOString(),
                     taxNotification: taxNotification
                         ? taxNotification
                         : userVehicleData?.taxNotification,
