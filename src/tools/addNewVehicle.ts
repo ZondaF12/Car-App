@@ -40,7 +40,7 @@ const addNewVehicle = async (numberPlate: string) => {
 
             newVehicle = {
                 taxDate: searchForVehicle.taxDueDate
-                    ? searchForVehicle.taxDueDate
+                    ? new Date(searchForVehicle.taxDueDate).toISOString()
                     : "SORN",
                 motDate: searchForVehicle.motExpiryDate
                     ? new Date(searchForVehicle.motExpiryDate).toISOString()

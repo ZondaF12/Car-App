@@ -89,6 +89,21 @@ const refreshVehicleDetails = async (userVehicles: any) => {
                     userVehicles[vehicle].numberPlate
                 );
 
+                const vehicleDocQuery = await getDoc(vehicleDoc);
+
+                const vehicleDocData = vehicleDocQuery.data();
+
+                const vehicleDocTaxDate = new Date(vehicleDocData?.taxDate);
+                const vehicleDocMotDate = new Date(vehicleDocData?.motDate);
+
+                const vehicleDocTaxDateChanged =
+                    userVehicles[vehicle].taxDate === "SORN"
+                        ? false
+                        : vehicleDocTaxDate.getTime() === newTaxDate.getTime();
+
+                const vehicleDocMotDateChanged =
+                    vehicleDocMotDate.getTime() === newMotDate.getTime();
+
                 /* Update the firebase docs with the new dates and
                  * notification id's if they have changed */
 
@@ -105,10 +120,12 @@ const refreshVehicleDetails = async (userVehicles: any) => {
                         : userVehicleData?.motNotification,
                 });
 
-                await updateDoc(vehicleDoc, {
-                    motDate: newMotDate,
-                    taxDate: newTaxDate,
-                });
+                if (!vehicleDocMotDateChanged || !vehicleDocTaxDateChanged) {
+                    await updateDoc(vehicleDoc, {
+                        motDate: newMotDate.toISOString(),
+                        taxDate: newTaxDate.toISOString(),
+                    });
+                }
             }
         } catch (error) {
             return error;
