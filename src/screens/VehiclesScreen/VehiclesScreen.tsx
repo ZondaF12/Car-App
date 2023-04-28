@@ -82,7 +82,21 @@ const VehiclesScreen = ({ navigation }: any) => {
     }, []);
 
     useEffect(() => {
-        refreshVehicleDetails(userVehicles);
+        for (let vehicle in userVehicles) {
+            const motDate = new Date(userVehicles[vehicle].motDate);
+            motDate.setDate(motDate.getDate() - 30);
+
+            const taxDate = new Date(userVehicles[vehicle].taxDate);
+            taxDate.setDate(taxDate.getDate() - 30);
+
+            if (
+                motDate.getTime() < new Date().getTime() ||
+                taxDate.getTime() < new Date().getTime()
+            ) {
+                refreshVehicleDetails(userVehicles);
+                break;
+            }
+        }
     }, [userVehiclesLoaded]);
 
     const onAddNewVehicle = async (numberPlate: string) => {
