@@ -168,6 +168,7 @@ const VehicleInfoScreen = ({ route }: any) => {
             dueDate: taxDate,
             co2Emissions: taxInfo.co2Emissions,
             registered: taxInfo.monthOfFirstRegistration,
+            fuelType: taxInfo.fuelType,
         });
     };
 

@@ -30,6 +30,7 @@ const ActionRow = ({ title, isValid, api, numberPlate }: Props) => {
                           dueDate: api.taxDueDate,
                           co2Emissions: api.co2Emissions,
                           registered: api.monthOfFirstRegistration,
+                          fuelType: api.fuelType,
                       })
                     : navigation.navigate("VehicleMot", {
                           motStatus: api.motStatus,

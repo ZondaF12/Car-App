@@ -29,7 +29,8 @@ const VehicleTaxScreen = ({ route }: any) => {
     const [newDate, setNewDate] = useState("");
     const [dayDifference, setDayDifference] = useState("");
     const [taxPrice, setTaxPrice] = useState("");
-    const { taxStatus, dueDate, co2Emissions, registered } = route.params;
+    const { taxStatus, dueDate, co2Emissions, registered, fuelType } =
+        route.params;
 
     useEffect(() => {
         const dateConverter = async (date: string) => {
@@ -65,8 +66,15 @@ const VehicleTaxScreen = ({ route }: any) => {
                     }
                 }
             } else {
-                if (co2Emissions > 0) taxPricing = "£165";
-                else taxPricing = "£0";
+                if (co2Emissions > 0 && fuelType != "ELECTRICITY") {
+                    if (fuelType === "PETROL" || fuelType === "DIESEL") {
+                        taxPricing = "£180";
+                    } else {
+                        taxPricing = "£170";
+                    }
+                } else {
+                    taxPricing = "£0";
+                }
             }
 
             setTaxPrice(taxPricing);
