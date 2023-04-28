@@ -136,7 +136,7 @@ const VehicleMotTestResultScreen = ({ route }: any) => {
                         {testFails.length > 0 ? (
                             <View className="w-full bg-red-500 p-2 rounded-lg shadow-xl">
                                 <Text className="text-white font-bold text-lg">
-                                    Major Defects (Repair Immediately)
+                                    Reason(s) for failure
                                 </Text>
                                 {testFails.map((failedComments: any) => (
                                     <View className="pt-2">
@@ -153,7 +153,7 @@ const VehicleMotTestResultScreen = ({ route }: any) => {
                         {testPrs.length > 0 ? (
                             <View className="w-full p-2 bg-orange-400 rounded-lg shadow-xl">
                                 <Text className="text-white font-bold text-lg">
-                                    PRS (Defects rectified at time of test)
+                                    Rectifiable issue(s)
                                 </Text>
                                 {testPrs.map((prsComments: any) => (
                                     <View className="pt-2">
@@ -170,7 +170,7 @@ const VehicleMotTestResultScreen = ({ route }: any) => {
                         {testAdvisories.length > 0 ? (
                             <View className="w-full bg-[#242731] p-2 rounded-lg shadow-xl">
                                 <Text className="text-white font-bold text-lg">
-                                    Advisories (Monitor & repair if necessary)
+                                    Advisory notice item(s)
                                 </Text>
                                 {testAdvisories.map((advisoryComments: any) => (
                                     <View className="pt-2">
