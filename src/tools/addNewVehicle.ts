@@ -25,82 +25,56 @@ const addNewVehicle = async (numberPlate: string) => {
         return;
     }
 
-    // Create new Vehicle if it doesnt already exist
-    const vehicleDoc = doc(database, "vehicles", vehicleRegPlate);
-    const q = await getDoc(vehicleDoc);
-
-    let newVehicle;
     try {
-        if (q.data()) {
-            console.log("Vehicle Already Exists");
-        } else {
-            // Create New Vehicle
-            const searchForVehicle = await getVehicleDetails(vehicleRegPlate);
-            const getExtraVehicleInfo = await getMotDetails(vehicleRegPlate);
+        /* Search API's for vehicle plate */
+        const searchForVehicle = await getVehicleDetails(vehicleRegPlate);
+        const getExtraVehicleInfo = await getMotDetails(vehicleRegPlate);
 
-            newVehicle = {
-                taxDate: searchForVehicle.taxDueDate
-                    ? new Date(searchForVehicle.taxDueDate).toISOString()
-                    : "SORN",
-                motDate: searchForVehicle.motExpiryDate
-                    ? new Date(searchForVehicle.motExpiryDate).toISOString()
-                    : getExtraVehicleInfo[0].motTestExpiryDate
-                    ? new Date(
-                          getExtraVehicleInfo[0].motTestExpiryDate
-                      ).toISOString()
-                    : "",
-                make: searchForVehicle.make,
-                model: getExtraVehicleInfo[0].model,
-            };
+        const newVehicle = {
+            taxDate: searchForVehicle.taxDueDate
+                ? new Date(searchForVehicle.taxDueDate).toISOString()
+                : "SORN",
+            motDate: searchForVehicle.motExpiryDate
+                ? new Date(searchForVehicle.motExpiryDate).toISOString()
+                : getExtraVehicleInfo[0].motTestExpiryDate
+                ? new Date(
+                      getExtraVehicleInfo[0].motTestExpiryDate
+                  ).toISOString()
+                : "",
+            make: searchForVehicle.make,
+            model: getExtraVehicleInfo[0].model,
+        };
 
-            await setDoc(doc(database, "vehicles", vehicleRegPlate), {
+        /* Setup the notifications for the new vehicle that has been added */
+        const setTaxNotification = await schedulePushNotification(
+            numberPlate,
+            newVehicle?.taxDate,
+            "TAX"
+        );
+
+        const setMotNotification = await schedulePushNotification(
+            numberPlate,
+            newVehicle?.motDate,
+            "MOT"
+        );
+
+        /* POST the new vehicle data to the users userVehicles collection */
+        await setDoc(
+            doc(
+                database,
+                "users",
+                curUser?.uid,
+                "userVehicles",
+                vehicleRegPlate
+            ),
+            {
                 ...newVehicle,
+                createdAt: new Date().toISOString(),
                 numberPlate: vehicleRegPlate,
-            });
-        }
-        // Add the vehicle to the user
-        if (!userVehicleDuplicateQuery.data()) {
-            let addVehicle;
-            if (q.data()) {
-                addVehicle = q.data();
-            } else {
-                addVehicle = newVehicle;
+                taxNotification: setTaxNotification ? setTaxNotification : "",
+                motNotification: setMotNotification ? setMotNotification : "",
             }
-
-            const setTaxNotification = await schedulePushNotification(
-                numberPlate,
-                addVehicle?.taxDate,
-                "TAX"
-            );
-
-            const setMotNotification = await schedulePushNotification(
-                numberPlate,
-                addVehicle?.motDate,
-                "MOT"
-            );
-
-            await setDoc(
-                doc(
-                    database,
-                    "users",
-                    curUser?.uid,
-                    "userVehicles",
-                    vehicleRegPlate
-                ),
-                {
-                    ...addVehicle,
-                    createdAt: new Date().toISOString(),
-                    numberPlate: vehicleRegPlate,
-                    taxNotification: setTaxNotification
-                        ? setTaxNotification
-                        : "",
-                    motNotification: setMotNotification
-                        ? setMotNotification
-                        : "",
-                }
-            );
-        }
-        // refresh the screen to display the new vehicle
+        );
     } catch (error: any) {
         Alert.alert(`${vehicleRegPlate} is an invalid plate`);
         console.error(error);

@@ -38,6 +38,7 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [userVehiclesLoaded, setUserVehiclesLoaded] = useState(false);
 
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
@@ -72,12 +73,17 @@ const VehiclesScreen = ({ navigation }: any) => {
             querySnapshot.forEach(async (doc) => {
                 setUserVehicles((vehicle: any) => vehicle.concat(doc.data()));
             });
+            setUserVehiclesLoaded(true);
         });
 
         return () => {
             unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        refreshVehicleDetails(userVehicles);
+    }, [userVehiclesLoaded]);
 
     const onAddNewVehicle = async (numberPlate: string) => {
         setIsLoading(true);

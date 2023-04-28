@@ -12,10 +12,10 @@ const refreshVehicleDetails = async (userVehicles: any) => {
                 userVehicles[vehicle].numberPlate
             );
 
-            let newMotDate = new Date(res.motExpiryDate);
-            const newTaxDate = new Date(res.taxDueDate);
+            let newMotDate = new Date(res?.motExpiryDate);
+            const newTaxDate = new Date(res?.taxDueDate);
 
-            if (!res.motExpiryDate) {
+            if (!res?.motExpiryDate) {
                 const motRes = await getMotDetails(
                     userVehicles[vehicle].numberPlate
                 );
@@ -83,32 +83,8 @@ const refreshVehicleDetails = async (userVehicles: any) => {
                     );
                 }
 
-                const vehicleDoc = doc(
-                    database,
-                    "vehicles",
-                    userVehicles[vehicle].numberPlate
-                );
-
-                const vehicleDocQuery = await getDoc(vehicleDoc);
-
-                const vehicleDocData = vehicleDocQuery.data();
-
-                const vehicleDocTaxDate = new Date(vehicleDocData?.taxDate);
-                const vehicleDocMotDate = new Date(vehicleDocData?.motDate);
-
-                const vehicleDocTaxDateChanged =
-                    userVehicles[vehicle].taxDate === "SORN"
-                        ? false
-                        : vehicleDocTaxDate.getTime() === newTaxDate.getTime();
-
-                const vehicleDocMotDateChanged =
-                    vehicleDocMotDate.getTime() === newMotDate.getTime();
-
                 /* Update the firebase docs with the new dates and
                  * notification id's if they have changed */
-
-                console.log(newMotDate.toISOString());
-
                 await updateDoc(userVehicleDoc, {
                     motDate: newMotDate.toISOString(),
                     taxDate: newTaxDate.toISOString(),
@@ -119,13 +95,6 @@ const refreshVehicleDetails = async (userVehicles: any) => {
                         ? motNotification
                         : userVehicleData?.motNotification,
                 });
-
-                if (!vehicleDocMotDateChanged || !vehicleDocTaxDateChanged) {
-                    await updateDoc(vehicleDoc, {
-                        motDate: newMotDate.toISOString(),
-                        taxDate: newTaxDate.toISOString(),
-                    });
-                }
             }
         } catch (error) {
             return error;
