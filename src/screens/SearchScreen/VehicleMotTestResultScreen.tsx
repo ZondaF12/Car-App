@@ -54,7 +54,7 @@ const VehicleMotTestResultScreen = ({ route }: any) => {
                             );
                             break;
                         case "ADVISORY":
-                            setTestAdvisories((testAdvisroies) =>
+                            setTestAdvisories((testAdvisories) =>
                                 testAdvisories.concat(advisories[test].text)
                             );
                             break;
