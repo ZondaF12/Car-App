@@ -1,9 +1,10 @@
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
+import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth } from "../../../firebase";
+import { auth, database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 
 async function schedulePushNotification() {
@@ -18,26 +19,20 @@ async function schedulePushNotification() {
 }
 
 const AccountScreen = () => {
-    const [user, setUser] = useState<any>("");
     const [userName, setUserName] = useState<any>("");
 
     const checkUser = async () => {
-        try {
-            const authUser = auth.currentUser!;
-            // console.log(authUser);
+        const authUser = auth.currentUser!;
 
-            const getUserName = authUser.email!.split("@");
+        const res = doc(database, "users", authUser.uid);
+        const getUserName = await getDoc(res);
+        const docData = getUserName.data();
 
-            setUser(authUser);
-            setUserName(getUserName[0]);
-        } catch (err) {
-            setUser("");
-        }
+        setUserName(docData?.name);
     };
 
     useEffect(() => {
         checkUser();
-        console.log(auth.currentUser?.email);
     }, [auth.currentUser]);
 
     const signOut = async () => {
