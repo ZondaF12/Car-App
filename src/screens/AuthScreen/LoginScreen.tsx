@@ -1,14 +1,15 @@
+import { CLIENT_ID, IOS_CLIENT_ID } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import {
-    OAuthProvider,
+    GoogleAuthProvider,
+    signInWithCredential,
     signInWithEmailAndPassword,
-    signInWithPopup,
 } from "firebase/auth";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -23,6 +24,7 @@ import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
 import { auth } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
+import signInWithApple from "../../tools/signInWithApple";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -36,14 +38,43 @@ const LoginScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [user, setUser] = useState(undefined);
+    const [token, setToken] = useState<any>("");
+    const [userInfo, setUserInfo] = useState<any>(null);
 
-    const [request, response, promptAsync] = Google.useAuthRequest({
-        iosClientId:
-            "1091684992494-vc38t5sbt2jpk3a1al1kdboso9q19no2.apps.googleusercontent.com",
-        clientId:
-            "1091684992494-v5fcm398rreg0d3b5va0l7p1ii10qh6a.apps.googleusercontent.com",
+    const [request, response, promptAsync]: any = Google.useAuthRequest({
+        iosClientId: IOS_CLIENT_ID,
+        clientId: CLIENT_ID,
     });
+
+    useEffect(() => {
+        if (response?.type === "success") {
+            setToken(response?.authentication!.accessToken);
+            getUserInfo();
+        }
+    }, [response, token]);
+
+    const getUserInfo = async () => {
+        try {
+            const res = await fetch(
+                "https://www.googleapis.com/userinfo/v2/me",
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const user = await res.json();
+            setUserInfo(user);
+
+            const credential = GoogleAuthProvider.credential(
+                userInfo?.id,
+                response?.authentication.accessToken
+            );
+
+            await signInWithCredential(auth, credential);
+        } catch (error) {
+            // Add your own error handler here
+        }
+    };
 
     const onLoginPressed = async (data: any) => {
         setLoading(true);
@@ -65,8 +96,6 @@ const LoginScreen = () => {
     const onGoogleLoginPressed = async () => {
         try {
             promptAsync();
-
-            console.log(response);
         } catch (error) {
             console.log(error);
         }
@@ -74,9 +103,7 @@ const LoginScreen = () => {
 
     const onAppleLoginPressed = async () => {
         try {
-            const provider = new OAuthProvider("apple.com");
-            const res = await signInWithPopup(auth, provider);
-            console.log(res);
+            await signInWithApple();
         } catch (error) {
             console.log(error);
         }
@@ -132,6 +159,7 @@ const LoginScreen = () => {
 
                 <View className="flex-row justify-between mb-8">
                     <TouchableOpacity
+                        // disabled={!request}
                         onPress={onGoogleLoginPressed}
                         className="border-[#707175] border-2 rounded-lg px-10 py-2"
                     >

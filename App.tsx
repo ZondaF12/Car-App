@@ -60,7 +60,7 @@ const Tabs = () => {
                     paddingTop: 0,
                     backgroundColor: "#1e2128",
                     position: "absolute",
-                    borderTopWidth: 1,
+                    borderTopWidth: 2,
                     borderTopColor: "#33343b",
                 },
             }}

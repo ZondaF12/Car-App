@@ -1,14 +1,18 @@
 import "@azure/core-asynciterator-polyfill";
+import { CLIENT_ID, IOS_CLIENT_ID } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Google from "expo-auth-session/providers/google";
 import {
+    GoogleAuthProvider,
     createUserWithEmailAndPassword,
     sendEmailVerification,
+    signInWithCredential,
     updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -24,6 +28,7 @@ import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
 import { auth, database } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
+import signInWithApple from "../../tools/signInWithApple";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -39,6 +44,13 @@ const RegisterScreen = () => {
     const [name, setName] = useState("");
     const [dobLabel, setDobLabel] = useState("");
     const [loading, setLoading] = useState(false);
+    const [token, setToken] = useState<any>("");
+    const [userInfo, setUserInfo] = useState<any>(null);
+
+    const [request, response, promptAsync]: any = Google.useAuthRequest({
+        iosClientId: IOS_CLIENT_ID,
+        clientId: CLIENT_ID,
+    });
 
     const registerPressed = async () => {
         if (registerPassword != confirmPassword) {
@@ -84,6 +96,52 @@ const RegisterScreen = () => {
         setDobLabel(date.toLocaleDateString("EN-GB"));
     };
 
+    useEffect(() => {
+        if (response?.type === "success") {
+            setToken(response?.authentication!.accessToken);
+            getUserInfo();
+        }
+    }, [response, token]);
+
+    const getUserInfo = async () => {
+        try {
+            const res = await fetch(
+                "https://www.googleapis.com/userinfo/v2/me",
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const user = await res.json();
+            setUserInfo(user);
+
+            const credential = GoogleAuthProvider.credential(
+                userInfo?.id,
+                response?.authentication.accessToken
+            );
+
+            await signInWithCredential(auth, credential);
+        } catch (error) {
+            // Add your own error handler here
+        }
+    };
+
+    const onGoogleLoginPressed = async () => {
+        try {
+            promptAsync();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const onAppleLoginPressed = async () => {
+        try {
+            await signInWithApple();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <KeyboardAvoidingView
             className="flex-1 justify-end bg-[#1e2128]"
@@ -96,7 +154,9 @@ const RegisterScreen = () => {
 
                 <View className="flex-row justify-between mb-8">
                     <TouchableOpacity
-                        onPress={() => {}}
+                        onPress={() => {
+                            onGoogleLoginPressed();
+                        }}
                         className="border-[#707175] border-2 rounded-lg px-10 py-2"
                     >
                         <GoogleLogoSvg height={24} width={24} />
@@ -110,7 +170,9 @@ const RegisterScreen = () => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={() => {}}
+                        onPress={() => {
+                            onAppleLoginPressed();
+                        }}
                         className="border-[#707175] border-2 rounded-lg px-10 py-2"
                     >
                         <AppleLogoSvg height={24} width={24} color={"#fff"} />
