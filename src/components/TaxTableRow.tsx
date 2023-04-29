@@ -1,5 +1,5 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { Text, View } from "react-native";
 
 type Props = {
     emissions: string;
@@ -54,7 +54,10 @@ const TaxTableRow = ({ emissions, band, isRating }: Props) => {
                     : ""
             } py-0.5`}
         >
-            <Text className="text-white font-bold basis-[20%] text-center">
+            <Text
+                className="text-white font-bold basis-[20%] text-center"
+                maxFontSizeMultiplier={1.2}
+            >
                 {emissions}
             </Text>
             <View className="w-full items-center h-7 justify-center basis-[70%]">

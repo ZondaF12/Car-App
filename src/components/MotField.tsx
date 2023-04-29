@@ -75,12 +75,18 @@ const MotField = ({
                 />
             </View>
             <View className="justify-center pr-4">
-                <Text className="text-base">{formattedMotDate}</Text>
-                <Text className="opacity-50">{motTestStatus}</Text>
+                <Text className="text-base" maxFontSizeMultiplier={1.2}>
+                    {formattedMotDate}
+                </Text>
+                <Text className="opacity-50" maxFontSizeMultiplier={1.2}>
+                    {motTestStatus}
+                </Text>
             </View>
             <View className="justify-center ml-auto px-4">
-                <Text className="text-base">{totalMilage} mi</Text>
-                <Text className="opacity-50">
+                <Text className="text-base" maxFontSizeMultiplier={1.2}>
+                    {totalMilage} mi
+                </Text>
+                <Text className="opacity-50" maxFontSizeMultiplier={1.2}>
                     {motTestStatus === "PASSED"
                         ? `+${milageDifference} mi`
                         : ""}
