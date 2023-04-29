@@ -39,8 +39,6 @@ const signInWithApple = async () => {
         })
         .catch((error) => {
             console.log(error);
-
-            // ...
         });
 };
 

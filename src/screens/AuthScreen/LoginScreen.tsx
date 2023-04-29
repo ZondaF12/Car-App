@@ -6,9 +6,11 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import {
     GoogleAuthProvider,
+    getAdditionalUserInfo,
     signInWithCredential,
     signInWithEmailAndPassword,
 } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -21,7 +23,7 @@ import { RootStackParamList } from "../../../App";
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
 import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
-import { auth } from "../../../firebase";
+import { auth, database } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
 import signInWithApple from "../../tools/signInWithApple";
@@ -70,7 +72,16 @@ const LoginScreen = () => {
                 response?.authentication.accessToken
             );
 
-            await signInWithCredential(auth, credential);
+            const login = await signInWithCredential(auth, credential);
+
+            const { isNewUser } = getAdditionalUserInfo(login)!;
+
+            if (isNewUser) {
+                await setDoc(doc(database, "users", login.user.uid), {
+                    email: login.user.email,
+                    name: login.user.displayName,
+                });
+            }
         } catch (error) {
             // Add your own error handler here
         }
