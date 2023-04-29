@@ -37,7 +37,9 @@ const VehicleTaxScreen = ({ route }: any) => {
             const newDate = new Date(date);
             let formattedDate = await Promise.resolve(newDate.toDateString());
 
-            if (!date) formattedDate = "N/A";
+            if (!date || date === "SORN") {
+                formattedDate = "N/A";
+            }
             setNewDate(formattedDate);
         };
 
@@ -85,7 +87,7 @@ const VehicleTaxScreen = ({ route }: any) => {
         dateDifference(dueDate);
     }, []);
 
-    if (!dayDifference) {
+    if (!taxPrice) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />
