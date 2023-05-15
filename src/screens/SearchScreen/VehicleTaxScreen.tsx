@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, SafeAreaView, Text, View } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 import { RootStackParamList } from "../../../App";
 import TaxTable from "../../components/TaxTable";
 
@@ -56,6 +56,11 @@ const VehicleTaxScreen = ({ route }: any) => {
         };
 
         const findTaxPrice = async (emission: number, registered: string) => {
+            if (!emission) {
+                setTaxPrice("Unknown");
+                return;
+            }
+
             const cutOffDate = new Date("2017-03");
             const registeredDate = new Date(registered);
 
@@ -87,13 +92,13 @@ const VehicleTaxScreen = ({ route }: any) => {
         dateDifference(dueDate);
     }, []);
 
-    if (!taxPrice) {
-        return (
-            <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
-                <ActivityIndicator size="large" color="#6c5dd2" />
-            </View>
-        );
-    }
+    // if (!taxPrice) {
+    //     return (
+    //         <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
+    //             <ActivityIndicator size="large" color="#6c5dd2" />
+    //         </View>
+    //     );
+    // }
 
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
@@ -133,7 +138,7 @@ const VehicleTaxScreen = ({ route }: any) => {
             <View className="flex-row justify-between w-[90%] px-4 py-2 bg-[#33343b]">
                 <Text className="text-white text-base">CO2 Emissions</Text>
                 <Text className="text-white text-base">
-                    {co2Emissions} g/km
+                    {co2Emissions ? co2Emissions + " g/km" : "Unknown"}
                 </Text>
             </View>
             <Text className="text-white mt-4 text-xs text-left w-[90%] px-4 font-extralight">

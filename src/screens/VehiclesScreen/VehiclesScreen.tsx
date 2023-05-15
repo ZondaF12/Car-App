@@ -84,10 +84,13 @@ const VehiclesScreen = ({ navigation }: any) => {
     useEffect(() => {
         for (let vehicle in userVehicles) {
             const motDate = new Date(userVehicles[vehicle].motDate);
-            motDate.setDate(motDate.getDate() - 30);
+            // motDate.setDate(motDate.getDate() - 30);
 
             const taxDate = new Date(userVehicles[vehicle].taxDate);
-            taxDate.setDate(taxDate.getDate() - 30);
+            // taxDate.setDate(taxDate.getDate() - 30);
+
+            console.log(motDate.getTime());
+            console.log(new Date().getTime());
 
             if (
                 motDate.getTime() < new Date().getTime() ||

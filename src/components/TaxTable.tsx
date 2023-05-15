@@ -1,5 +1,5 @@
-import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
+import { View } from "react-native";
 import TaxTableRow from "./TaxTableRow";
 
 type Props = {
@@ -23,7 +23,7 @@ const TaxTable = ({ emissions }: Props) => {
                 setBand("HI");
             } else if (co2 > 185 && co2 < 226) {
                 setBand("JK");
-            } else {
+            } else if (co2 > 225) {
                 setBand("LM");
             }
         };

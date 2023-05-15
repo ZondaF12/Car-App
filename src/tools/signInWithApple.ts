@@ -33,6 +33,7 @@ const signInWithApple = async () => {
                 await setDoc(doc(database, "users", res.user.uid), {
                     email: appleCredential.email,
                     name: appleCredential.fullName?.givenName,
+                    accountType: "FREE",
                 });
             }
             return res;

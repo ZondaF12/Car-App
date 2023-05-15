@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { auth } from "./firebase";
 import AccountScreen from "./src/screens/AccountScreen/AccountScreen";
+import EditProfileScreen from "./src/screens/AccountScreen/EditProfileScreen";
 import ConfirmEmailScreen from "./src/screens/AuthScreen/ConfirmEmailScreen";
 import LoginScreen from "./src/screens/AuthScreen/LoginScreen";
 import RegisterScreen from "./src/screens/AuthScreen/RegisterScreen";
@@ -35,6 +36,7 @@ export type RootStackParamList = {
     VehicleMot: any;
     VehicleInfo: any;
     VehicleMotResults: any;
+    EditProfile: undefined;
 };
 
 Notifications.setNotificationHandler({
@@ -97,7 +99,11 @@ const Tabs = () => {
                 options={{
                     tabBarIcon: ({ color, size, focused }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "account" : "account-outline"}
+                            name={
+                                focused
+                                    ? "account-circle"
+                                    : "account-circle-outline"
+                            }
                             size={size}
                             color={color}
                         />
@@ -224,6 +230,11 @@ const App = () => {
                 <Stack.Screen
                     name="Account"
                     component={Tabs}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="EditProfile"
+                    component={EditProfileScreen}
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen

@@ -157,7 +157,7 @@ const VehicleInfoScreen = ({ route }: any) => {
 
     const onMotPress = async () => {
         navigation.navigate("VehicleMot", {
-            motStatus: taxPercent < 100 ? "Valid" : "Not Valid",
+            motStatus: motPercent < 100 ? "Valid" : "Not Valid",
             motExpiry: motDate,
             numberPlate: numberPlate,
         });

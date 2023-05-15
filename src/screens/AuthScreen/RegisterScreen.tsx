@@ -7,6 +7,7 @@ import * as Google from "expo-auth-session/providers/google";
 import {
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
+    getAdditionalUserInfo,
     sendEmailVerification,
     signInWithCredential,
     updateProfile,
@@ -20,7 +21,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../../App";
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
@@ -72,6 +72,7 @@ const RegisterScreen = () => {
             await setDoc(doc(database, "users", newUser.user.uid), {
                 email: newUser.user.email,
                 name: name,
+                accountType: "FREE",
             });
 
             await sendEmailVerification(newUser.user);
@@ -120,7 +121,17 @@ const RegisterScreen = () => {
                 response?.authentication.accessToken
             );
 
-            await signInWithCredential(auth, credential);
+            const login = await signInWithCredential(auth, credential);
+
+            const { isNewUser } = getAdditionalUserInfo(login)!;
+
+            if (isNewUser) {
+                await setDoc(doc(database, "users", login.user.uid), {
+                    email: login.user.email,
+                    name: login.user.displayName,
+                    accountType: "FREE",
+                });
+            }
         } catch (error) {
             // Add your own error handler here
         }
@@ -229,26 +240,6 @@ const RegisterScreen = () => {
                     }
                     inputType="password"
                     setLabel={setConfirmPassword}
-                />
-
-                <View className="flex-row border-[#ccc] border-b pb-2 mb-8">
-                    <MaterialIcons name="date-range" size={20} color={"#fff"} />
-                    <TouchableOpacity
-                        onPress={showDatePicker}
-                        className="justify-center items-center"
-                    >
-                        <Text className="text-white ml-2 ">
-                            {dobLabel ? dobLabel : "Date of Birth"}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                    display={"inline"}
                 />
 
                 <LoginRegisterButton

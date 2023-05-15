@@ -80,6 +80,7 @@ const LoginScreen = () => {
                 await setDoc(doc(database, "users", login.user.uid), {
                     email: login.user.email,
                     name: login.user.displayName,
+                    accountType: "FREE",
                 });
             }
         } catch (error) {

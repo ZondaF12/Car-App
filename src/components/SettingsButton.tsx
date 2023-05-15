@@ -1,55 +1,29 @@
-import { View, Text, TouchableOpacity, Switch } from "react-native";
-import React, { useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
     label: string;
-    icon: any;
-    primaryColor: string;
-    secondaryColor: string;
-    lastItem?: boolean;
-    switchButton?: boolean;
+    onPress?: any;
+    bold?: boolean;
 };
 
-const SettingsButton = ({
-    label,
-    icon,
-    primaryColor,
-    secondaryColor,
-    lastItem,
-    switchButton,
-}: Props) => {
-    const [isEnabled, setIsEnabled] = useState(true);
-    const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-
+const SettingsButton = ({ label, onPress, bold }: Props) => {
     return (
-        <View
-            className={`flex-row px-8 items-center ${lastItem ? "" : "mb-8"}`}
-        >
-            <View
-                className={`bg-[${secondaryColor}] w-12 h-12 items-center justify-center rounded-full`}
+        <View className="mx-8 py-4 border-b border-[#707175]">
+            <TouchableOpacity
+                className="flex-row justify-between items-center"
+                onPress={onPress}
             >
-                <Ionicons name={icon} size={24} color={primaryColor} />
-            </View>
-            <View className="pl-8 justify-center">
-                <Text className="text-white text-lg">{label}</Text>
-            </View>
-
-            {switchButton ? (
-                <Switch
-                    className="ml-auto"
-                    trackColor={{ false: "#33343b", true: "#6c5dd2" }}
-                    thumbColor="#fff"
-                    ios_backgroundColor="#33343b"
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
-                />
-            ) : (
-                <TouchableOpacity className="bg-[#707175] w-12 h-12 opacity-50 items-center justify-center rounded-xl ml-auto">
-                    <Entypo name="chevron-right" size={20} color="white" />
-                </TouchableOpacity>
-            )}
+                <Text
+                    className={`text-white text-base ${
+                        bold ? "font-bold" : ""
+                    }`}
+                >
+                    {label}
+                </Text>
+                <Entypo name="chevron-thin-right" size={18} color="white" />
+            </TouchableOpacity>
         </View>
     );
 };
