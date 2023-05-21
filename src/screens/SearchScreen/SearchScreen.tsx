@@ -155,7 +155,12 @@ const SearchScreen = ({ navigation }: any) => {
                         onSubmitEditing={(event) =>
                             navigation.navigate("VehicleCheck", {
                                 screen: "VehicleCheck",
-                                params: { numberPlate: event.nativeEvent.text },
+                                params: {
+                                    numberPlate: event.nativeEvent.text.replace(
+                                        /\s/g,
+                                        ""
+                                    ),
+                                },
                             })
                         }
                         autoCorrect={false}
