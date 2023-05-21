@@ -15,7 +15,9 @@ const TableFields = ({ title, data, lastRow }: Props) => {
             } px-10 py-4 space-y-0.5`}
         >
             <Text className="text-[#707175] text-sm">{title}</Text>
-            <Text className="text-white text-base font-bold">{data}</Text>
+            <Text className="text-white text-base font-bold">
+                {data ? data : "-"}
+            </Text>
         </View>
     );
 };

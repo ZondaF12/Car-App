@@ -39,7 +39,7 @@ const VehicleTaxScreen = ({ route }: any) => {
             let formattedDate = await Promise.resolve(newDate.toDateString());
 
             if (!date || date === "SORN") {
-                formattedDate = "N/A";
+                formattedDate = "-";
             }
             setNewDate(formattedDate);
         };
@@ -119,7 +119,7 @@ const VehicleTaxScreen = ({ route }: any) => {
                             ? `${dayDifference} Days`
                             : +dayDifference < 0
                             ? `${+dayDifference * -1} Days Ago`
-                            : "N/A"}
+                            : "-"}
                     </Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4 mt-5">

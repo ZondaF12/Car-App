@@ -35,8 +35,11 @@ const SearchHistory = ({ numberPlate, carModel, regYear, date }: Props) => {
                     {numberPlate}
                 </Text>
             </View>
-            <View className="ml-4">
-                <Text className="text-white text-base">
+            <View className="ml-4 w-[50%]">
+                <Text
+                    numberOfLines={1}
+                    className="text-white text-base truncate"
+                >
                     {`${regYear} ${carModel}`}
                 </Text>
                 <Text className="text-[#707175] text-xs">

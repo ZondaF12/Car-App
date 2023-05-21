@@ -110,7 +110,7 @@ const VehicleMotScreen = ({ route }: any) => {
                             ? `${dayDifference} Days`
                             : +dayDifference < 0
                             ? `${+dayDifference * -1} Days Ago`
-                            : "N/A"}
+                            : "-"}
                     </Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4 mt-5">
