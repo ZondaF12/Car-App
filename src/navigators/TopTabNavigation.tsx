@@ -74,6 +74,9 @@ function MyTabs(props: any) {
                 name="FullReport"
                 component={FullReport}
                 options={{ tabBarLabel: "Full Report" }}
+                initialParams={{
+                    numberPlate: props.numberPlate,
+                }}
             />
             <TopTabs.Screen
                 name="VehicleCheck"

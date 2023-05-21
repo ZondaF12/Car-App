@@ -1,6 +1,10 @@
+import { REVENUECAT_APPLE } from "@env";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { doc, setDoc } from "firebase/firestore";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Purchases from "react-native-purchases";
+import { auth, database } from "../../../firebase";
 import FullCheckList from "../../components/FullCheckList";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
@@ -9,14 +13,56 @@ export type NavigationProp = NativeStackNavigationProp<
     "FullReport"
 >;
 
-const FullReport = () => {
+const FullReport = ({ route }: any) => {
+    const { numberPlate } = route.params;
+
+    const handlePurchaseReport = async () => {
+        await Purchases.configure({ apiKey: REVENUECAT_APPLE });
+        const offerings = await Purchases.getOfferings();
+        // const purchaserInfo = await Purchases.purchasePackage(
+        //     offerings.all.REPORT.availablePackages[0]
+        // );
+        const purchaserInfo = await Purchases.purchaseProduct("vehicle_report");
+        console.log(purchaserInfo);
+
+        const curUser = auth.currentUser!;
+        await setDoc(
+            doc(database, "users", curUser.uid, "purchases", numberPlate),
+            {
+                purchaseDate:
+                    purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,
+            }
+        );
+    };
+
     return (
-        <View>
-            <ScrollView
-                contentContainerStyle={{ alignItems: "center" }}
-                className=" px-4 relative bg-[#1e2128]"
-            >
-                <View className="w-full mb-32">
+        <View className="bg-[#1e2128]">
+            <View>
+                <View className="px-4 pt-8">
+                    <Text className="text-white font-bold text-3xl">
+                        Full Vehicle Report
+                    </Text>
+                    <Text className="text-white text-base pt-2">
+                        Get a report to avoid bad deals, sell faster, or learn
+                        if your vehicle’s safe.
+                    </Text>
+                </View>
+                <View className="px-4 pt-4">
+                    <TouchableOpacity
+                        className="w-full bg-[#6c5dd2] items-center justify-center p-4"
+                        onPress={handlePurchaseReport}
+                    >
+                        <Text className="text-white font-bold">
+                            Purchase Report
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                <Text className="p-4 text-white font-bold text-xl">
+                    What's Included in a Report?
+                </Text>
+            </View>
+            <ScrollView contentContainerStyle={{ alignItems: "center" }}>
+                <View className="w-full mb-72">
                     <FullCheckList
                         icon="police-badge-outline"
                         header="Stolen"
@@ -80,11 +126,6 @@ const FullReport = () => {
                     />
                 </View>
             </ScrollView>
-            <TouchableOpacity className="absolute inset-x-0 bottom-8 left-4 right-4 h-16 bg-[#6c5dd2] rounded-full items-center justify-center">
-                <Text className="text-center text-lg font-bold text-white">
-                    Purchase Full Report
-                </Text>
-            </TouchableOpacity>
         </View>
     );
 };

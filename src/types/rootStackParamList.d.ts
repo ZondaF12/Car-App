@@ -10,5 +10,5 @@ export type RootStackParamList = {
     VehicleInfo: any;
     VehicleMotResults: any;
     EditProfile: undefined;
-    FullReport: undefined;
+    FullReport: any;
 };

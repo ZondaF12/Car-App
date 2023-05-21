@@ -20,9 +20,6 @@ export type NavigationProp = NativeStackNavigationProp<
 
 const VehicleMotScreen = ({ route }: any) => {
     const { motStatus, motExpiry, numberPlate } = route.params;
-
-    console.log(route);
-
     const [motTests, setMotTests] = useState<any>([]);
     const [dayDifference, setDayDifference] = useState("");
     const [carMotDate, setCarMotDate] = useState("");

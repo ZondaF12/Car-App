@@ -38,7 +38,6 @@ async function registerForPushNotificationsAsync() {
             return;
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
-        console.log(token);
     } else {
         alert("Must use physical device for Push Notifications");
     }
@@ -68,9 +67,7 @@ const App = () => {
 
         responseListener.current =
             Notifications.addNotificationResponseReceivedListener(
-                (response) => {
-                    console.log(response);
-                }
+                (response) => {}
             );
 
         return () => {
@@ -92,10 +89,6 @@ const App = () => {
         const subscriber = auth.onAuthStateChanged(checkUser);
         return subscriber;
     }, []);
-
-    const getNumberPlate = async (route: any) => {
-        console.log(route);
-    };
 
     if (isLoading) {
         return (

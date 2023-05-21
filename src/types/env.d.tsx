@@ -10,4 +10,5 @@ declare module "@env" {
     export const FIREBASE_MEASUREMENT_ID: string;
     export const IOS_CLIENT_ID: string;
     export const CLIENT_ID: string;
+    export const REVENUECAT_APPLE: string;
 }

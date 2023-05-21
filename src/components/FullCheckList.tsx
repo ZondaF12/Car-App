@@ -10,7 +10,7 @@ type Props = {
 
 const FullCheckList = ({ header, description, icon }: Props) => {
     return (
-        <View className="flex-row p-4 border-b border-[#707175]">
+        <View className="flex-row p-4">
             <View className="items-center justify-center mr-4 w-8">
                 <MaterialCommunityIcons name={icon} size={32} color="white" />
             </View>
