@@ -1,30 +1,11 @@
-import BottomSheet from "@gorhom/bottom-sheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../../App";
-import ActionRow from "../../components/ActionRow";
-import FullCheckList from "../../components/FullCheckList";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import TableFields from "../../components/TableFields";
 import addToSearchHistory from "../../tools/addToSearchHistory";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
-import { getVehicleImage } from "../../tools/getVehicleImage";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -33,18 +14,8 @@ export type NavigationProp = NativeStackNavigationProp<
 
 const VehicleCheckScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp>();
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const snapPoints = useMemo(() => ["15%", "85%"], []);
     const [vehicleDetails, setVehicleDetails] = useState<any>();
-    const [vehicleImage, setVehicleImage] = useState<any>();
     const vehicleRegPlate = route.params.numberPlate.replace(/\s/g, "");
-    const [sheetIndex, setSheetIndex] = useState<number>();
-    const [isBottomSheetLoaded, setIsBottomSheetLoaded] = useState(false);
-
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log("handleSheetChanges", index);
-        setSheetIndex(index);
-    }, []);
 
     useEffect(() => {
         const onGetVehicleDetails = async () => {
@@ -60,18 +31,7 @@ const VehicleCheckScreen = ({ route }: any) => {
             }
         };
 
-        const onGetVehicleImage = async () => {
-            try {
-                const res = await getVehicleImage(vehicleRegPlate);
-                setVehicleImage(res);
-            } catch (error: any) {
-                navigation.goBack();
-                Alert.alert(`error`, error.message);
-            }
-        };
-
         onGetVehicleDetails();
-        // onGetVehicleImage();
     }, [vehicleRegPlate]);
 
     useEffect(() => {
@@ -86,7 +46,9 @@ const VehicleCheckScreen = ({ route }: any) => {
         checkSearchHistory();
     }, [vehicleDetails]);
 
-    // const vehicleImage: any = undefined; // getVehicleImage(route.params.numberPlate);
+    useEffect(() => {
+        navigation.setOptions({ title: "TEST" });
+    }, []);
 
     if (vehicleDetails === "Request Failed") {
         navigation.goBack();
@@ -116,90 +78,10 @@ const VehicleCheckScreen = ({ route }: any) => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-[#1e2128]">
-            <View className="items-center h-[86%]">
-                <View className="flex-row items-center justify-center z-20">
-                    <View className="flex-1 justify-start items-start h-12 top-3">
-                        <TouchableOpacity
-                            className="pl-8 flex-1 items-center justify-center"
-                            onPress={() => navigation.goBack()}
-                        >
-                            <Text className="text-white text-center text-3xl">
-                                &larr;
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View className="flex-1 items-center justify-center">
-                        <View className="bg-white w-52 items-center justify-center h-12 rounded-lg top-3 z-20 shadow-2xl">
-                            <Text className="text-2xl font-bold uppercase">
-                                {route.params.numberPlate}
-                            </Text>
-                        </View>
-                    </View>
-                    <View className="flex-1"></View>
-                </View>
-
-                <ScrollView
-                    contentContainerStyle={{ alignItems: "center" }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {vehicleImage ? (
-                        <Image
-                            className="mt-10"
-                            source={{ uri: vehicleImage }}
-                            style={{
-                                height: 130,
-                                width: 350,
-                                marginBottom: 20,
-                            }}
-                        />
-                    ) : (
-                        <Image
-                            className="mt-10"
-                            source={require("../../../assets/car.png")}
-                            style={{
-                                height: 130,
-                                width: 350,
-                                marginBottom: 20,
-                            }}
-                        />
-                    )}
-
-                    <ActionRow
-                        title="Tax"
-                        isValid={
-                            vehicleDetails.taxStatus === "Taxed" ||
-                            vehicleDetails.taxStatus === "SORN"
-                                ? true
-                                : false
-                        }
-                        api={vehicleDetails}
-                        numberPlate={vehicleRegPlate}
-                    />
-                    <ActionRow
-                        title="Mot"
-                        isValid={
-                            vehicleDetails.motStatus === "Valid"
-                                ? true
-                                : vehicleDetails.motStatus ===
-                                  "No details held by DVLA"
-                                ? newCarMotDate(
-                                      vehicleDetails?.monthOfFirstRegistration
-                                  )
-                                : false
-                        }
-                        api={vehicleDetails}
-                        numberPlate={vehicleRegPlate}
-                    />
-
-                    <View className="mt-5 rounded-lg w-full border-2 border-[#33343b]">
-                        <View
-                            className={`rounded-t-lg h-12 items-center flex-row justify-center px-8 border-b-2 border-[#33343b]`}
-                        >
-                            <Text className="text-white text-lg font-bold">
-                                Basic Vehicle Details
-                            </Text>
-                        </View>
+        <View className="flex-1 bg-[#1e2128]">
+            <View className="items-center">
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <View className="w-screen">
                         <TableFields title="Make" data={vehicleDetails.make} />
                         {/* <TableFields
                             title="Model"
@@ -253,7 +135,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                     </View>
                 </ScrollView>
             </View>
-            <BottomSheet
+            {/* <BottomSheet
                 ref={bottomSheetRef}
                 index={0}
                 snapPoints={snapPoints}
@@ -347,20 +229,8 @@ const VehicleCheckScreen = ({ route }: any) => {
                         />
                     </View>
                 </ScrollView>
-
-                {isBottomSheetLoaded ? (
-                    <TouchableOpacity className="absolute inset-x-0 bottom-8 left-4 right-4 h-16 bg-[#6c5dd2] rounded-full items-center justify-center">
-                        <Text className="text-center text-lg font-bold text-white">
-                            Purchase Full Report
-                        </Text>
-                    </TouchableOpacity>
-                ) : (
-                    <View className="flex-1 p-10 items-center justify-center">
-                        <ActivityIndicator size="large" />
-                    </View>
-                )}
-            </BottomSheet>
-        </SafeAreaView>
+            </BottomSheet> */}
+        </View>
     );
 };
 

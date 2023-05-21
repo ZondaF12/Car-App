@@ -22,7 +22,8 @@ import {
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import { auth, database } from "../../../firebase";
 import VehicleInfo from "../../components/VehicleInfo";
 import addNewVehicle from "../../tools/addNewVehicle";

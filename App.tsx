@@ -1,9 +1,3 @@
-import {
-    Ionicons,
-    MaterialCommunityIcons,
-    MaterialIcons,
-} from "@expo/vector-icons";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Device from "expo-device";
@@ -11,33 +5,14 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { auth } from "./firebase";
-import AccountScreen from "./src/screens/AccountScreen/AccountScreen";
+import BottomNavNavigator from "./src/navigators/BottomTabNavigation";
+import TopBarNavigator from "./src/navigators/TopTabNavigation";
 import EditProfileScreen from "./src/screens/AccountScreen/EditProfileScreen";
-import ConfirmEmailScreen from "./src/screens/AuthScreen/ConfirmEmailScreen";
 import LoginScreen from "./src/screens/AuthScreen/LoginScreen";
 import RegisterScreen from "./src/screens/AuthScreen/RegisterScreen";
-import SearchScreen from "./src/screens/SearchScreen/SearchScreen";
-import VehicleCheckScreen from "./src/screens/SearchScreen/VehicleCheckScreen";
-import VehicleMotScreen from "./src/screens/SearchScreen/VehicleMotScreen";
 import VehicleMotTestResultScreen from "./src/screens/SearchScreen/VehicleMotTestResultScreen";
-import VehicleTaxScreen from "./src/screens/SearchScreen/VehicleTaxScreen";
 import VehicleInfoScreen from "./src/screens/VehiclesScreen/VehicleInfoScreen";
-import VehiclesScreen from "./src/screens/VehiclesScreen/VehiclesScreen";
-
-export type RootStackParamList = {
-    Login: undefined;
-    Register: undefined;
-    ConfirmEmail: any;
-    Vehicles: any;
-    Search: undefined;
-    Account: undefined;
-    VehicleCheck: any;
-    VehicleTax: any;
-    VehicleMot: any;
-    VehicleInfo: any;
-    VehicleMotResults: any;
-    EditProfile: undefined;
-};
+import { RootStackParamList } from "./src/types/rootStackParamList";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -46,73 +21,6 @@ Notifications.setNotificationHandler({
         shouldSetBadge: false,
     }),
 });
-
-const Tab = createBottomTabNavigator<RootStackParamList>();
-
-const Tabs = () => {
-    return (
-        <Tab.Navigator
-            screenOptions={{
-                tabBarActiveTintColor: "#6c5dd2",
-                tabBarInactiveTintColor: "#fff",
-                headerShown: false,
-                tabBarStyle: {
-                    height: 90,
-                    paddingHorizontal: 5,
-                    paddingTop: 0,
-                    backgroundColor: "#1e2128",
-                    position: "absolute",
-                    borderTopWidth: 2,
-                    borderTopColor: "#33343b",
-                },
-            }}
-        >
-            <Tab.Screen
-                name="Vehicles"
-                component={VehiclesScreen}
-                options={{
-                    tabBarIcon: ({ color, size, focused }) => (
-                        <Ionicons
-                            name={focused ? "car-sharp" : "car-outline"}
-                            size={size}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Search"
-                component={SearchScreen}
-                options={{
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialIcons
-                            name="search"
-                            size={size}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Account"
-                component={AccountScreen}
-                options={{
-                    tabBarIcon: ({ color, size, focused }) => (
-                        <MaterialCommunityIcons
-                            name={
-                                focused
-                                    ? "account-circle"
-                                    : "account-circle-outline"
-                            }
-                            size={size}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
-        </Tab.Navigator>
-    );
-};
 
 async function registerForPushNotificationsAsync() {
     let token;
@@ -185,6 +93,10 @@ const App = () => {
         return subscriber;
     }, []);
 
+    const getNumberPlate = async (route: any) => {
+        console.log(route);
+    };
+
     if (isLoading) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
@@ -199,7 +111,7 @@ const App = () => {
                 {user ? (
                     <Stack.Screen
                         name="Vehicles"
-                        component={Tabs}
+                        component={BottomNavNavigator}
                         options={{ headerShown: false }}
                     />
                 ) : (
@@ -214,22 +126,17 @@ const App = () => {
                             component={RegisterScreen}
                             options={{ headerShown: false }}
                         />
-                        <Stack.Screen
-                            name="ConfirmEmail"
-                            component={ConfirmEmailScreen}
-                            options={{ headerShown: false }}
-                        />
                     </>
                 )}
 
                 <Stack.Screen
                     name="Search"
-                    component={Tabs}
+                    component={BottomNavNavigator}
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
                     name="Account"
-                    component={Tabs}
+                    component={BottomNavNavigator}
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
@@ -239,23 +146,63 @@ const App = () => {
                 />
                 <Stack.Screen
                     name="VehicleCheck"
-                    component={VehicleCheckScreen}
-                    options={{ headerShown: false }}
+                    component={TopBarNavigator}
+                    options={({ route }) => ({
+                        headerStyle: {
+                            backgroundColor: "#1e2128",
+                        },
+                        headerTintColor: "#fff",
+                        headerTitleStyle: {
+                            fontWeight: "bold",
+                        },
+                        headerBackTitleVisible: false,
+                        headerTitle: route.params?.params?.numberPlate,
+                    })}
                 />
                 <Stack.Screen
                     name="VehicleTax"
-                    component={VehicleTaxScreen}
-                    options={{ headerShown: false, presentation: "modal" }}
+                    component={TopBarNavigator}
+                    options={({ route }) => ({
+                        headerStyle: {
+                            backgroundColor: "#1e2128",
+                        },
+                        headerTintColor: "#fff",
+                        headerTitleStyle: {
+                            fontWeight: "bold",
+                        },
+                        headerBackTitleVisible: false,
+                        headerTitle: route.params?.params?.numberPlate,
+                    })}
                 />
                 <Stack.Screen
                     name="VehicleMot"
-                    component={VehicleMotScreen}
-                    options={{ headerShown: false, presentation: "modal" }}
+                    component={TopBarNavigator}
+                    options={({ route }) => ({
+                        headerStyle: {
+                            backgroundColor: "#1e2128",
+                        },
+                        headerTintColor: "#fff",
+                        headerTitleStyle: {
+                            fontWeight: "bold",
+                        },
+                        headerBackTitleVisible: false,
+                        headerTitle: route.params?.params?.numberPlate,
+                    })}
                 />
                 <Stack.Screen
                     name="VehicleInfo"
                     component={VehicleInfoScreen}
-                    options={{ headerShown: false, presentation: "modal" }}
+                    options={({ route }) => ({
+                        headerStyle: {
+                            backgroundColor: "#1e2128",
+                        },
+                        headerTintColor: "#fff",
+                        headerTitleStyle: {
+                            fontWeight: "bold",
+                        },
+                        headerBackTitleVisible: false,
+                        headerTitle: route.params?.numberPlate,
+                    })}
                 />
                 <Stack.Screen
                     name="VehicleMotResults"

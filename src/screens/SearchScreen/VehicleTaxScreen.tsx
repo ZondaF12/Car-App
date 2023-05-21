@@ -1,7 +1,8 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, Text, View } from "react-native";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import TaxTable from "../../components/TaxTable";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -102,12 +103,7 @@ const VehicleTaxScreen = ({ route }: any) => {
 
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
-            <View className="my-10">
-                <Text className="items-center justify-center text-white text-center text-2xl font-bold">
-                    Tax Details
-                </Text>
-            </View>
-            <View className="w-[90%]">
+            <View className="w-[90%] mt-8">
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">Tax Status</Text>
                     <Text className="text-white text-base">{taxStatus}</Text>

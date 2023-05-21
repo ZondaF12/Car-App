@@ -22,9 +22,9 @@ import {
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../../App";
 import { auth, database } from "../../../firebase";
 import SearchHistory from "../../components/SearchHistory";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -154,7 +154,8 @@ const SearchScreen = ({ navigation }: any) => {
                         autoCapitalize={"characters"}
                         onSubmitEditing={(event) =>
                             navigation.navigate("VehicleCheck", {
-                                numberPlate: event.nativeEvent.text,
+                                screen: "VehicleCheck",
+                                params: { numberPlate: event.nativeEvent.text },
                             })
                         }
                         autoCorrect={false}

@@ -2,7 +2,8 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Alert, SafeAreaView, Text, View } from "react-native";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
 

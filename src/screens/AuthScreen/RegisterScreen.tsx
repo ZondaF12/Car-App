@@ -21,7 +21,8 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
 import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";

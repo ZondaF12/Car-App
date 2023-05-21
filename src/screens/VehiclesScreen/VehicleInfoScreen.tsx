@@ -12,7 +12,8 @@ import {
     View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import MotSvgComponent from "../../../assets/MotSvg";
 import { auth, database } from "../../../firebase";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
@@ -157,18 +158,25 @@ const VehicleInfoScreen = ({ route }: any) => {
 
     const onMotPress = async () => {
         navigation.navigate("VehicleMot", {
-            motStatus: motPercent < 100 ? "Valid" : "Not Valid",
-            motExpiry: motDate,
-            numberPlate: numberPlate,
+            screen: "VehicleMot",
+            params: {
+                motStatus: motPercent < 100 ? "Valid" : "Not Valid",
+                motExpiry: motDate,
+                numberPlate: numberPlate,
+            },
         });
     };
     const onTaxPress = async () => {
         navigation.navigate("VehicleTax", {
-            taxStatus: taxInfo.taxStatus,
-            dueDate: taxDate,
-            co2Emissions: taxInfo.co2Emissions,
-            registered: taxInfo.monthOfFirstRegistration,
-            fuelType: taxInfo.fuelType,
+            screen: "VehicleTax",
+            params: {
+                numberPlate: numberPlate,
+                taxStatus: taxInfo.taxStatus,
+                dueDate: taxDate,
+                co2Emissions: taxInfo.co2Emissions,
+                registered: taxInfo.monthOfFirstRegistration,
+                fuelType: taxInfo.fuelType,
+            },
         });
     };
 

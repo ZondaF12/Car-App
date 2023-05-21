@@ -8,7 +8,8 @@ import {
     View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import MotField from "../../components/MotField";
 import { getMotDetails } from "../../tools/getMotDetails";
 
@@ -19,6 +20,9 @@ export type NavigationProp = NativeStackNavigationProp<
 
 const VehicleMotScreen = ({ route }: any) => {
     const { motStatus, motExpiry, numberPlate } = route.params;
+
+    console.log(route);
+
     const [motTests, setMotTests] = useState<any>([]);
     const [dayDifference, setDayDifference] = useState("");
     const [carMotDate, setCarMotDate] = useState("");
@@ -90,12 +94,7 @@ const VehicleMotScreen = ({ route }: any) => {
 
     return (
         <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
-            <View className="my-10">
-                <Text className="items-center justify-center text-white text-center text-2xl font-bold">
-                    MOT Details
-                </Text>
-            </View>
-            <View className="w-[90%]">
+            <View className="w-[90%] mt-8">
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">MOT Status</Text>
                     <Text className="text-white text-base">{motStatus}</Text>

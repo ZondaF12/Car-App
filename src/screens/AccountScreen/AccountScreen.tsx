@@ -7,7 +7,8 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../../App";
+import { RootStackParamList } from "../../types/rootStackParamList";
+
 import { auth, database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 
