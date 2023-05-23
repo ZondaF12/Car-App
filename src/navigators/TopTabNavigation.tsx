@@ -67,7 +67,6 @@ function MyTabs(props: any) {
                     shadowOpacity: 0.58,
                     shadowRadius: 5.0,
                 },
-                tabBarPressColor: "#6c5dd2",
             }}
         >
             <TopTabs.Screen

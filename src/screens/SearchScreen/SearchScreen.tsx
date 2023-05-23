@@ -24,6 +24,7 @@ import CountryFlag from "react-native-country-flag";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, database } from "../../../firebase";
 import SearchHistory from "../../components/SearchHistory";
+import { useAuth } from "../../contexts/AuthContext";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -42,9 +43,10 @@ const SearchScreen = ({ navigation }: any) => {
     const [searchHistory, setSearchHistory] = useState<any>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchPlate, setSearchPlate] = useState("");
+    const { getUser } = useAuth();
 
     const checkSearchHistory = async () => {
-        const curUser = auth.currentUser!;
+        const curUser = await getUser();
         const searchHistoryQuery = await getDocs(
             query(
                 collection(database, "users", curUser?.uid, "searchHistory"),
@@ -107,7 +109,7 @@ const SearchScreen = ({ navigation }: any) => {
     };
 
     const clearSearchHistory = async () => {
-        const curUser = auth.currentUser!;
+        const curUser = await getUser();
         for (let vehicle in searchHistory) {
             await deleteDoc(
                 doc(
@@ -130,7 +132,7 @@ const SearchScreen = ({ navigation }: any) => {
     }
 
     return (
-        <SafeAreaView
+        <View
             className={`flex-1 bg-[#1e2128] items-center justify-start pt-8 h-full space-y-6`}
         >
             <View className="flex-row w-[90%] shadow-2xl h-[11%]">
@@ -171,7 +173,7 @@ const SearchScreen = ({ navigation }: any) => {
                     ></TextInput>
                 </View>
             </View>
-            <View className="w-[90%] max-h-[75%] shadow-xl rounded-lg bg-[#242731]">
+            <View className="w-[90%] max-h-[73%] shadow-xl rounded-lg bg-[#242731]">
                 <View className="flex-row justify-between">
                     <View className="px-6 py-6">
                         <Text className="text-white text-xl">
@@ -228,7 +230,7 @@ const SearchScreen = ({ navigation }: any) => {
                     />
                 </ScrollView>
             </View> */}
-        </SafeAreaView>
+        </View>
     );
 };
 

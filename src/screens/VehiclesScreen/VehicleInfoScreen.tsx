@@ -15,7 +15,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 import MotSvgComponent from "../../../assets/MotSvg";
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
+import { useAuth } from "../../contexts/AuthContext";
 import { getVehicleDetails } from "../../tools/getVehicleDetails";
 import schedulePushNotification from "../../tools/notifications/scheduleNotification";
 
@@ -33,6 +34,7 @@ const VehicleInfoScreen = ({ route }: any) => {
     const [insurancePercent, setInsurancePercent] = useState<any>();
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [taxInfo, setTaxInfo] = useState<any>();
+    const { getUser } = useAuth();
 
     useEffect(() => {
         dateConverter(motDate, "MOT");
@@ -85,7 +87,7 @@ const VehicleInfoScreen = ({ route }: any) => {
     };
 
     const deleteVehicleFromGarage = async () => {
-        const curUser = auth.currentUser!;
+        const curUser = await getUser();
 
         const userVehicleDoc = doc(
             database,
@@ -124,7 +126,7 @@ const VehicleInfoScreen = ({ route }: any) => {
 
     const handleUpdateInsuranceDate = async (date: Date) => {
         /* Add submitted date to the userVehicle vehicle doc */
-        const curUser = auth.currentUser!;
+        const curUser = await getUser();
 
         const userVehicleDoc = doc(
             database,

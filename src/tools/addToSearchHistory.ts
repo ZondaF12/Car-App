@@ -1,12 +1,15 @@
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { auth, database } from "../../firebase";
+import { database } from "../../firebase";
+import { useAuth } from "../contexts/AuthContext";
 
 const addToSearchHistory = async (
     numberPlate: string,
     vehicleMake: string,
     yearOfReg: number
 ) => {
-    const curUser = auth.currentUser!;
+    const { getUser } = useAuth();
+
+    const curUser = await getUser();
 
     /* Check if numberplate already exists in history - if it does then update
      * the entry of the createdAt to the current time */

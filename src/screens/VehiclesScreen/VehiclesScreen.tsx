@@ -1,8 +1,10 @@
 import "@azure/core-asynciterator-polyfill";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
+    doc,
+    getDoc,
     getDocs,
     onSnapshot,
     orderBy,
@@ -22,12 +24,17 @@ import {
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../types/rootStackParamList";
-
-import { auth, database } from "../../../firebase";
+import SwitchSelector, {
+    ISwitchSelectorOption,
+} from "react-native-switch-selector";
+import { database } from "../../../firebase";
+import ProfilePictureCircle from "../../components/ProfilePictureCircle";
 import VehicleInfo from "../../components/VehicleInfo";
+import VehicleInfoFleet from "../../components/VehicleInfoFleet";
+import { useAuth } from "../../contexts/AuthContext";
 import addNewVehicle from "../../tools/addNewVehicle";
 import refreshVehicleDetails from "../../tools/refreshVehicleDetails";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -40,9 +47,15 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [isLoading, setIsLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [userVehiclesLoaded, setUserVehiclesLoaded] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [vehicleView, setVehicleView] = useState<
+        string | number | ISwitchSelectorOption
+    >("default");
+    const [location, setLocation] = useState("");
+    const { getUser } = useAuth();
 
     const checkUserVehicles = async () => {
-        const curUser = auth.currentUser!;
+        const curUser = await getUser();
 
         setUserVehicles([]);
 
@@ -61,10 +74,30 @@ const VehiclesScreen = ({ navigation }: any) => {
     };
 
     useEffect(() => {
-        const curUser = auth.currentUser!;
+        const getUserName = async () => {
+            setUserName(await getUser().displayName);
+        };
 
+        if (!userName) {
+            getUserName();
+        }
+    }, [navigation.isFocused()]);
+
+    useEffect(() => {
+        const getUserLocation = async () => {
+            const res = doc(database, "users", getUser().uid);
+            const getUserData = await getDoc(res);
+            const userData = getUserData.data();
+
+            setLocation(userData?.location);
+        };
+
+        getUserLocation();
+    }, []);
+
+    useEffect(() => {
         const q = query(
-            collection(database, "users", curUser.uid, "userVehicles"),
+            collection(database, "users", getUser().uid, "userVehicles"),
             orderBy("createdAt")
         );
 
@@ -128,7 +161,13 @@ const VehiclesScreen = ({ navigation }: any) => {
         });
     };
 
-    if (isLoading) {
+    const handleChangeVehicleLayout = async (
+        view: string | number | ISwitchSelectorOption
+    ) => {
+        setVehicleView(view);
+    };
+
+    if (isLoading || !userName) {
         return (
             <SafeAreaView className="flex-1 bg-[#1e2128] items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />
@@ -137,13 +176,7 @@ const VehiclesScreen = ({ navigation }: any) => {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-[#1e2128] items-center mb-[55]">
-            <View className="px-8 pt-8 pb-12 items-center w-full flex-row justify-between">
-                <Text className="text-white text-[42px]">My Garage</Text>
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <AntDesign name="pluscircle" size={30} color="#6c5dd2" />
-                </TouchableOpacity>
-            </View>
+        <View className="flex-1 bg-[#1e2128] items-center">
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -218,32 +251,134 @@ const VehiclesScreen = ({ navigation }: any) => {
                     />
                 }
             >
-                {userVehicles.length > 0 ? (
-                    userVehicles.map((vehicle: any) => (
-                        <VehicleInfo
-                            numberPlate={vehicle.numberPlate}
-                            make={vehicle.make}
-                            model={vehicle.model}
-                            motDate={vehicle.motDate}
-                            taxDate={vehicle.taxDate}
-                            insuranceDate={vehicle.insuranceDate}
-                            onClick={() =>
-                                vehcileInfoClicked(
-                                    vehicle.numberPlate,
-                                    vehicle.motDate,
-                                    vehicle.taxDate,
-                                    vehicle.insuranceDate
-                                )
+                <View className="flex-row mb-4 space-x-8 items-center pt-8">
+                    <ProfilePictureCircle name={userName} />
+                    <View>
+                        <Text className="text-white text-xl">
+                            {userName.toLocaleUpperCase()}
+                        </Text>
+                        <View className="pt-2 space-y-0.5">
+                            {location ? (
+                                <View className="flex-row items-center space-x-1">
+                                    <MaterialIcons
+                                        name="location-on"
+                                        size={20}
+                                        color="white"
+                                    />
+                                    <Text className="text-white text-center text-base">
+                                        {location}
+                                    </Text>
+                                </View>
+                            ) : (
+                                ""
+                            )}
+
+                            <View className="flex-row items-center space-x-1">
+                                <MaterialIcons
+                                    name="directions-car"
+                                    size={20}
+                                    color="white"
+                                />
+                                <Text className="text-white text-center text-base">
+                                    {userVehicles.length} Cars
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+                <View className="flex-row items-center justify-between mb-2">
+                    <View className="w-44">
+                        <SwitchSelector
+                            initial={0}
+                            onPress={(value) =>
+                                handleChangeVehicleLayout(value)
                             }
+                            hasPadding
+                            options={[
+                                {
+                                    label: "",
+                                    value: "default",
+                                    customIcon: (
+                                        <Feather
+                                            name="grid"
+                                            size={24}
+                                            color="white"
+                                        />
+                                    ),
+                                },
+                                {
+                                    label: "",
+                                    value: "fleet",
+                                    customIcon: (
+                                        <MaterialIcons
+                                            name="menu"
+                                            size={24}
+                                            color="white"
+                                        />
+                                    ),
+                                },
+                            ]}
+                            buttonColor="#6c5dd2"
+                            backgroundColor="#242731"
+                            borderColor="#242731"
+                            textColor="#fff"
                         />
-                    ))
-                ) : (
-                    <TouchableOpacity className="items-center justify-center">
-                        <Text className="text-white text-lg">No Vehicles</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                        <AntDesign
+                            name="pluscircle"
+                            size={35}
+                            color="#6c5dd2"
+                        />
                     </TouchableOpacity>
-                )}
+                </View>
+                <View className="mb-16">
+                    {userVehicles.length > 0 ? (
+                        userVehicles.map((vehicle: any) =>
+                            vehicleView === "default" ? (
+                                <VehicleInfo
+                                    numberPlate={vehicle.numberPlate}
+                                    make={vehicle.make}
+                                    model={vehicle.model}
+                                    motDate={vehicle.motDate}
+                                    taxDate={vehicle.taxDate}
+                                    insuranceDate={vehicle.insuranceDate}
+                                    onClick={() =>
+                                        vehcileInfoClicked(
+                                            vehicle.numberPlate,
+                                            vehicle.motDate,
+                                            vehicle.taxDate,
+                                            vehicle.insuranceDate
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <VehicleInfoFleet
+                                    numberPlate={vehicle.numberPlate}
+                                    motDate={vehicle.motDate}
+                                    taxDate={vehicle.taxDate}
+                                    insuranceDate={vehicle.insuranceDate}
+                                    onClick={() =>
+                                        vehcileInfoClicked(
+                                            vehicle.numberPlate,
+                                            vehicle.motDate,
+                                            vehicle.taxDate,
+                                            vehicle.insuranceDate
+                                        )
+                                    }
+                                />
+                            )
+                        )
+                    ) : (
+                        <TouchableOpacity className="items-center justify-center">
+                            <Text className="text-white text-lg">
+                                No Vehicles
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 

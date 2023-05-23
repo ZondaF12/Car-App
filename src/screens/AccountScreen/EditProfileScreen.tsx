@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../types/rootStackParamList";
-
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
+import { useAuth } from "../../contexts/AuthContext";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -20,10 +20,11 @@ const EditProfileScreen = () => {
     const [userName, setUserName] = useState("");
     const [userEmail, setUserEmail] = useState("");
     const [currentName, setCurrentName] = useState("");
+    const { getUser } = useAuth();
 
     useEffect(() => {
-        const getUser = async () => {
-            const authUser = auth.currentUser!;
+        const handleGetUser = async () => {
+            const authUser = await getUser();
 
             const res = doc(database, "users", authUser.uid);
             const getUserData = await getDoc(res);
@@ -34,11 +35,11 @@ const EditProfileScreen = () => {
             setCurrentName(userData?.name);
         };
 
-        getUser();
+        handleGetUser();
     }, []);
 
     const saveChanges = async () => {
-        const authUser = auth.currentUser!;
+        const authUser = await getUser();
 
         if (currentName != userName) {
             const res = doc(database, "users", authUser.uid);

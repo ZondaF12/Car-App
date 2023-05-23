@@ -1,11 +1,14 @@
 import * as Notifications from "expo-notifications";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, database } from "../../firebase";
+import { database } from "../../firebase";
+import { useAuth } from "../contexts/AuthContext";
 import { getMotDetails } from "./getMotDetails";
 import { getVehicleDetails } from "./getVehicleDetails";
 import schedulePushNotification from "./notifications/scheduleNotification";
 
 const refreshVehicleDetails = async (userVehicles: any) => {
+    const { getUser } = useAuth();
+
     for (let vehicle in userVehicles) {
         try {
             const res = await getVehicleDetails(
@@ -40,7 +43,7 @@ const refreshVehicleDetails = async (userVehicles: any) => {
             /* If true this will then update the values that have been stored */
 
             if (taxDateChanged || motDateChanged) {
-                const curUser = auth.currentUser!;
+                const curUser = await getUser();
                 const userVehicleDoc = doc(
                     database,
                     "users",

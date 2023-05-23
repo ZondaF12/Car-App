@@ -1,10 +1,12 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Device from "expo-device";
+import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { auth } from "./firebase";
+import { AuthProvider } from "./src/contexts/AuthContext";
 import BottomNavNavigator from "./src/navigators/BottomTabNavigation";
 import TopBarNavigator from "./src/navigators/TopTabNavigation";
 import EditProfileScreen from "./src/screens/AccountScreen/EditProfileScreen";
@@ -90,6 +92,14 @@ const App = () => {
         return subscriber;
     }, []);
 
+    useEffect(() => {
+        const getLocation = async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+        };
+
+        getLocation();
+    }, []);
+
     if (isLoading) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
@@ -99,111 +109,117 @@ const App = () => {
     }
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator>
-                {user ? (
+        <AuthProvider>
+            <NavigationContainer>
+                <Stack.Navigator>
+                    {user ? (
+                        <Stack.Screen
+                            name="Vehicles"
+                            component={BottomNavNavigator}
+                            options={{
+                                headerShown: false,
+                            }}
+                        />
+                    ) : (
+                        <>
+                            <Stack.Screen
+                                name="Login"
+                                component={LoginScreen}
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="Register"
+                                component={RegisterScreen}
+                                options={{ headerShown: false }}
+                            />
+                        </>
+                    )}
+
                     <Stack.Screen
-                        name="Vehicles"
+                        name="Search"
+                        component={BottomNavNavigator}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Account"
                         component={BottomNavNavigator}
                         options={{ headerShown: false }}
                     />
-                ) : (
-                    <>
-                        <Stack.Screen
-                            name="Login"
-                            component={LoginScreen}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="Register"
-                            component={RegisterScreen}
-                            options={{ headerShown: false }}
-                        />
-                    </>
-                )}
-
-                <Stack.Screen
-                    name="Search"
-                    component={BottomNavNavigator}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="Account"
-                    component={BottomNavNavigator}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="EditProfile"
-                    component={EditProfileScreen}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="VehicleCheck"
-                    component={TopBarNavigator}
-                    options={({ route }) => ({
-                        headerStyle: {
-                            backgroundColor: "#1e2128",
-                        },
-                        headerTintColor: "#fff",
-                        headerTitleStyle: {
-                            fontWeight: "bold",
-                        },
-                        headerBackTitleVisible: false,
-                        headerTitle: route.params?.params?.numberPlate,
-                    })}
-                />
-                <Stack.Screen
-                    name="VehicleTax"
-                    component={TopBarNavigator}
-                    options={({ route }) => ({
-                        headerStyle: {
-                            backgroundColor: "#1e2128",
-                        },
-                        headerTintColor: "#fff",
-                        headerTitleStyle: {
-                            fontWeight: "bold",
-                        },
-                        headerBackTitleVisible: false,
-                        headerTitle: route.params?.params?.numberPlate,
-                    })}
-                />
-                <Stack.Screen
-                    name="VehicleMot"
-                    component={TopBarNavigator}
-                    options={({ route }) => ({
-                        headerStyle: {
-                            backgroundColor: "#1e2128",
-                        },
-                        headerTintColor: "#fff",
-                        headerTitleStyle: {
-                            fontWeight: "bold",
-                        },
-                        headerBackTitleVisible: false,
-                        headerTitle: route.params?.params?.numberPlate,
-                    })}
-                />
-                <Stack.Screen
-                    name="VehicleInfo"
-                    component={VehicleInfoScreen}
-                    options={({ route }) => ({
-                        headerStyle: {
-                            backgroundColor: "#1e2128",
-                        },
-                        headerTintColor: "#fff",
-                        headerTitleStyle: {
-                            fontWeight: "bold",
-                        },
-                        headerBackTitleVisible: false,
-                        headerTitle: route.params?.numberPlate,
-                    })}
-                />
-                <Stack.Screen
-                    name="VehicleMotResults"
-                    component={VehicleMotTestResultScreen}
-                    options={{ headerShown: false, presentation: "modal" }}
-                />
-            </Stack.Navigator>
-        </NavigationContainer>
+                    <Stack.Screen
+                        name="EditProfile"
+                        component={EditProfileScreen}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="VehicleCheck"
+                        component={TopBarNavigator}
+                        options={({ route }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: route.params?.params?.numberPlate,
+                        })}
+                    />
+                    <Stack.Screen
+                        name="VehicleTax"
+                        component={TopBarNavigator}
+                        options={({ route }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: route.params?.params?.numberPlate,
+                        })}
+                    />
+                    <Stack.Screen
+                        name="VehicleMot"
+                        component={TopBarNavigator}
+                        options={({ route }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: route.params?.params?.numberPlate,
+                        })}
+                    />
+                    <Stack.Screen
+                        name="VehicleInfo"
+                        component={VehicleInfoScreen}
+                        options={({ route }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: route.params?.numberPlate,
+                        })}
+                    />
+                    <Stack.Screen
+                        name="VehicleMotResults"
+                        component={VehicleMotTestResultScreen}
+                        options={{ headerShown: false, presentation: "modal" }}
+                    />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </AuthProvider>
     );
 };
 

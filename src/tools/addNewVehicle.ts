@@ -1,12 +1,15 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Alert } from "react-native";
-import { auth, database } from "../../firebase";
+import { database } from "../../firebase";
+import { useAuth } from "../contexts/AuthContext";
 import { getMotDetails } from "./getMotDetails";
 import { getVehicleDetails } from "./getVehicleDetails";
 import schedulePushNotification from "./notifications/scheduleNotification";
 
 const addNewVehicle = async (numberPlate: string) => {
-    const curUser = auth.currentUser!;
+    const { getUser } = useAuth();
+
+    const curUser = await getUser();
 
     const vehicleRegPlate = numberPlate.replace(/\s/g, "");
 

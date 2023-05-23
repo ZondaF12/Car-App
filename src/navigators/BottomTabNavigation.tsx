@@ -4,6 +4,7 @@ import {
     MaterialIcons,
 } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Header from "../components/Header";
 import AccountScreen from "../screens/AccountScreen/AccountScreen";
 import SearchScreen from "../screens/SearchScreen/SearchScreen";
 import VehiclesScreen from "../screens/VehiclesScreen/VehiclesScreen";
@@ -18,7 +19,6 @@ const Tabs = () => {
             screenOptions={{
                 tabBarActiveTintColor: "#6c5dd2",
                 tabBarInactiveTintColor: "#fff",
-                headerShown: false,
                 tabBarStyle: {
                     height: 90,
                     paddingHorizontal: 5,
@@ -41,6 +41,22 @@ const Tabs = () => {
                             color={color}
                         />
                     ),
+                    headerStyle: {
+                        backgroundColor: "#1e2128",
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 1,
+                        },
+                        shadowOpacity: 0.58,
+                        shadowRadius: 5.0,
+                    },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                    },
+                    headerTitle: (props) => <Header screen="MY GARAGE" />,
+                    headerShadowVisible: true,
                 }}
             />
             <Tab.Screen
@@ -54,6 +70,22 @@ const Tabs = () => {
                             color={color}
                         />
                     ),
+                    headerStyle: {
+                        backgroundColor: "#1e2128",
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 1,
+                        },
+                        shadowOpacity: 0.58,
+                        shadowRadius: 5.0,
+                    },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                    },
+                    headerTitle: (props) => <Header screen="SEARCH" />,
+                    headerShadowVisible: true,
                 }}
             />
             <Tab.Screen
@@ -71,6 +103,22 @@ const Tabs = () => {
                             color={color}
                         />
                     ),
+                    headerStyle: {
+                        backgroundColor: "#1e2128",
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 1,
+                        },
+                        shadowOpacity: 0.58,
+                        shadowRadius: 5.0,
+                    },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                    },
+                    headerTitle: (props) => <Header screen="ACCOUNT" />,
+                    headerShadowVisible: true,
                 }}
             />
         </Tab.Navigator>

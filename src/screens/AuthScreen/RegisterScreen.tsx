@@ -1,19 +1,11 @@
 import "@azure/core-asynciterator-polyfill";
-import { CLIENT_ID, IOS_CLIENT_ID } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Google from "expo-auth-session/providers/google";
-import {
-    GoogleAuthProvider,
-    createUserWithEmailAndPassword,
-    getAdditionalUserInfo,
-    sendEmailVerification,
-    signInWithCredential,
-    updateProfile,
-} from "firebase/auth";
+import * as Location from "expo-location";
+import { sendEmailVerification, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -21,15 +13,15 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { RootStackParamList } from "../../types/rootStackParamList";
-
 import AppleLogoSvg from "../../../assets/AppleLogoSvg";
 import FacebookLogoSvg from "../../../assets/FacebookLogoSvg";
 import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
+import { useAuth } from "../../contexts/AuthContext";
 import signInWithApple from "../../tools/signInWithApple";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -47,11 +39,7 @@ const RegisterScreen = () => {
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<any>("");
     const [userInfo, setUserInfo] = useState<any>(null);
-
-    const [request, response, promptAsync]: any = Google.useAuthRequest({
-        iosClientId: IOS_CLIENT_ID,
-        clientId: CLIENT_ID,
-    });
+    const { userSignUp, googleLogin, appleLogin } = useAuth();
 
     const registerPressed = async () => {
         if (registerPassword != confirmPassword) {
@@ -60,11 +48,18 @@ const RegisterScreen = () => {
         }
         setLoading(true);
         try {
-            const newUser = await createUserWithEmailAndPassword(
-                auth,
-                registerEmail,
-                registerPassword
-            );
+            const newUser = await userSignUp(registerEmail, registerPassword);
+
+            const { status } = await Location.getForegroundPermissionsAsync();
+
+            let getAddress: Location.LocationGeocodedAddress[] | undefined;
+
+            if (status === "granted") {
+                const location = await Location.getCurrentPositionAsync({});
+                getAddress = await Location.reverseGeocodeAsync(
+                    location.coords
+                );
+            }
 
             await updateProfile(newUser.user, {
                 displayName: name,
@@ -74,76 +69,24 @@ const RegisterScreen = () => {
                 email: newUser.user.email,
                 name: name,
                 accountType: "FREE",
+                location: getAddress
+                    ? `${getAddress[0].city}, ${getAddress[0].country}`
+                    : "",
             });
 
             await sendEmailVerification(newUser.user);
-
-            // navigation.navigate("ConfirmEmail", { email: registerEmail });
         } catch (err: any) {
             Alert.alert(err.message);
         }
         setLoading(false);
     };
 
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
-
     const hideDatePicker = () => {
         setDatePickerVisibility(false);
     };
 
-    const handleConfirm = (date: Date) => {
-        hideDatePicker();
-        setDobLabel(date.toLocaleDateString("EN-GB"));
-    };
-
-    useEffect(() => {
-        if (response?.type === "success") {
-            setToken(response?.authentication!.accessToken);
-            getUserInfo();
-        }
-    }, [response, token]);
-
-    const getUserInfo = async () => {
-        try {
-            const res = await fetch(
-                "https://www.googleapis.com/userinfo/v2/me",
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            const user = await res.json();
-            setUserInfo(user);
-
-            const credential = GoogleAuthProvider.credential(
-                userInfo?.id,
-                response?.authentication.accessToken
-            );
-
-            const login = await signInWithCredential(auth, credential);
-
-            const { isNewUser } = getAdditionalUserInfo(login)!;
-
-            if (isNewUser) {
-                await setDoc(doc(database, "users", login.user.uid), {
-                    email: login.user.email,
-                    name: login.user.displayName,
-                    accountType: "FREE",
-                });
-            }
-        } catch (error) {
-            // Add your own error handler here
-        }
-    };
-
     const onGoogleLoginPressed = async () => {
-        try {
-            promptAsync();
-        } catch (error) {
-            console.log(error);
-        }
+        await googleLogin();
     };
 
     const onAppleLoginPressed = async () => {

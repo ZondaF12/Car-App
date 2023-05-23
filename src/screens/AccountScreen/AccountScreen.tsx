@@ -6,11 +6,10 @@ import * as Application from "expo-application";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../types/rootStackParamList";
-
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
+import { useAuth } from "../../contexts/AuthContext";
+import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -42,9 +41,10 @@ const AccountScreen = () => {
     const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
     const [isUsingDeviceSettings, setIsUsingDeviceSettings] = useState(false);
     const [userAccountType, setUserAccountType] = useState("");
+    const { userSignOut, getUser } = useAuth();
 
     const checkUser = async () => {
-        const authUser = auth.currentUser!;
+        const authUser = await getUser();
 
         const res = doc(database, "users", authUser.uid);
         const getUserName = await getDoc(res);
@@ -72,7 +72,7 @@ const AccountScreen = () => {
     }, [useIsFocused()]);
 
     const signOut = async () => {
-        auth.signOut();
+        await userSignOut();
     };
 
     const toggleDarkMode = async () => {
@@ -84,7 +84,7 @@ const AccountScreen = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-[#1e2128] mb-14">
+        <View className="flex-1 bg-[#1e2128]">
             <ScrollView className="mt-2">
                 <TouchableOpacity
                     className="flex-row p-8 justify-between"
@@ -130,7 +130,7 @@ const AccountScreen = () => {
                         <Text className="text-white text-base">Log Out</Text>
                     </TouchableOpacity>
                 </View>
-                <View className="mx-8 py-4">
+                <View className="mx-8 py-4 mb-24">
                     <Text className="text-[#707175] text-sm">
                         Version {Application.nativeApplicationVersion}
                     </Text>
@@ -192,7 +192,7 @@ const AccountScreen = () => {
                     </View>
                 </View>
             </BottomSheet>
-        </SafeAreaView>
+        </View>
     );
 };
 

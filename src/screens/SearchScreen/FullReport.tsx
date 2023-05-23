@@ -1,11 +1,12 @@
 import { REVENUECAT_APPLE } from "@env";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Purchases from "react-native-purchases";
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
 import FullCheckList from "../../components/FullCheckList";
+import { useAuth } from "../../contexts/AuthContext";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -15,19 +16,47 @@ export type NavigationProp = NativeStackNavigationProp<
 
 const FullReport = ({ route }: any) => {
     const { numberPlate } = route.params;
+    const { getUser } = useAuth();
 
     const handlePurchaseReport = async () => {
-        await Purchases.configure({ apiKey: REVENUECAT_APPLE });
-        const offerings = await Purchases.getOfferings();
-        // const purchaserInfo = await Purchases.purchasePackage(
-        //     offerings.all.REPORT.availablePackages[0]
-        // );
+        const purchaseQuery = doc(
+            database,
+            "users",
+            await getUser(),
+            "purchases",
+            numberPlate
+        );
+        const vehicleCheck = await getDoc(purchaseQuery);
+        const userVehicleData = vehicleCheck.data();
+
+        if (userVehicleData) {
+            console.log("Already Purchased");
+            Alert.alert(
+                "Report Already Purchased",
+                `Are you sure you want to purchase a report for this vehicle again?`,
+                [
+                    {
+                        text: "Cancel",
+                        style: "cancel",
+                    },
+                    {
+                        text: "Purchase",
+                        style: "default",
+                        onPress: () => purchaseReport(),
+                    },
+                ]
+            );
+        } else {
+            await purchaseReport();
+        }
+    };
+
+    const purchaseReport = async () => {
+        Purchases.configure({ apiKey: REVENUECAT_APPLE });
         const purchaserInfo = await Purchases.purchaseProduct("vehicle_report");
         console.log(purchaserInfo);
-
-        const curUser = auth.currentUser!;
         await setDoc(
-            doc(database, "users", curUser.uid, "purchases", numberPlate),
+            doc(database, "users", await getUser(), "purchases", numberPlate),
             {
                 purchaseDate:
                     purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,
