@@ -16,7 +16,6 @@ import GoogleLogoSvg from "../../../assets/GoogleLogoSvg";
 import InputField from "../../components/InputField";
 import LoginRegisterButton from "../../components/LoginRegisterButton";
 import { useAuth } from "../../contexts/AuthContext";
-import signInWithApple from "../../tools/signInWithApple";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -52,7 +51,7 @@ const LoginScreen = () => {
 
     const onAppleLoginPressed = async () => {
         try {
-            await signInWithApple();
+            await appleLogin();
         } catch (error) {
             console.log(error);
         }

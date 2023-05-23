@@ -19,10 +19,11 @@ const FullReport = ({ route }: any) => {
     const { getUser } = useAuth();
 
     const handlePurchaseReport = async () => {
+        const curUser = await getUser();
         const purchaseQuery = doc(
             database,
             "users",
-            await getUser(),
+            curUser.uid,
             "purchases",
             numberPlate
         );
@@ -52,11 +53,17 @@ const FullReport = ({ route }: any) => {
     };
 
     const purchaseReport = async () => {
-        Purchases.configure({ apiKey: REVENUECAT_APPLE });
+        await Purchases.configure({ apiKey: REVENUECAT_APPLE });
         const purchaserInfo = await Purchases.purchaseProduct("vehicle_report");
         console.log(purchaserInfo);
         await setDoc(
-            doc(database, "users", await getUser(), "purchases", numberPlate),
+            doc(
+                database,
+                "users",
+                await getUser().uid,
+                "purchases",
+                numberPlate
+            ),
             {
                 purchaseDate:
                     purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,

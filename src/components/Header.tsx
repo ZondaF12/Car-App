@@ -16,15 +16,15 @@ function getInitials(name: any) {
 
 const Header = ({ screen }: Props) => {
     const [userName, setUserName] = useState("");
-    const { getUser } = useAuth();
+    const { getUser, getUserName } = useAuth();
 
     useEffect(() => {
-        const getUserName = async () => {
-            setUserName(await getUser().displayName);
+        const getUserDisplayName = async () => {
+            setUserName(await getUserName());
         };
 
         if (!userName) {
-            getUserName();
+            getUserDisplayName();
         }
     }, []);
 

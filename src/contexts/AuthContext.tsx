@@ -8,9 +8,10 @@ import {
     signInWithCredential,
     signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, database } from "../../firebase";
+import signInWithApple from "../tools/signInWithApple";
 
 const AuthContext = createContext<any>({});
 
@@ -22,7 +23,6 @@ WebBrowser.maybeCompleteAuthSession();
 
 export function AuthProvider({ children }: any) {
     const [user, setUser] = useState();
-    const [token, setToken] = useState<any>("");
 
     const [request, response, promptAsync]: any = Google.useAuthRequest({
         iosClientId: IOS_CLIENT_ID,
@@ -30,20 +30,12 @@ export function AuthProvider({ children }: any) {
     });
 
     useEffect(() => {
-        console.log("TESTING123");
-
-        const handleUserInfo = async () => {
-            await getUserInfo();
-        };
-        console.log(response?.type);
-
         if (response?.type === "success") {
-            setToken(response?.authentication!.accessToken);
-            handleUserInfo();
+            getUserInfo(response?.authentication!.accessToken);
         }
     }, [response]);
 
-    const getUserInfo = async () => {
+    const getUserInfo = async (token: string) => {
         try {
             const credential = GoogleAuthProvider.credential(null, token);
 
@@ -83,8 +75,24 @@ export function AuthProvider({ children }: any) {
         }
     }
 
+    async function appleLogin() {
+        try {
+            await signInWithApple();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     function getUser() {
         return auth.currentUser;
+    }
+
+    async function getUserName() {
+        const res = doc(database, "users", auth.currentUser?.uid!);
+        const getUserName = await getDoc(res);
+        const docData = getUserName.data();
+
+        return docData?.name;
     }
 
     const checkUser = async (user: any) => {
@@ -101,10 +109,12 @@ export function AuthProvider({ children }: any) {
             value={{
                 user,
                 getUser,
+                getUserName,
                 userLogin,
                 userSignOut,
                 userSignUp,
                 googleLogin,
+                appleLogin,
             }}
         >
             {children}

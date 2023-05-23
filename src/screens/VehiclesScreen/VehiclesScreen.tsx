@@ -52,7 +52,7 @@ const VehiclesScreen = ({ navigation }: any) => {
         string | number | ISwitchSelectorOption
     >("default");
     const [location, setLocation] = useState("");
-    const { getUser } = useAuth();
+    const { getUser, getUserName } = useAuth();
 
     const checkUserVehicles = async () => {
         const curUser = await getUser();
@@ -74,12 +74,12 @@ const VehiclesScreen = ({ navigation }: any) => {
     };
 
     useEffect(() => {
-        const getUserName = async () => {
-            setUserName(await getUser().displayName);
+        const getUserDisplayName = async () => {
+            setUserName(await getUserName());
         };
 
         if (!userName) {
-            getUserName();
+            getUserDisplayName();
         }
     }, [navigation.isFocused()]);
 
