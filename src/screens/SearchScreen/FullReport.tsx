@@ -67,6 +67,7 @@ const FullReport = ({ route }: any) => {
             {
                 purchaseDate:
                     purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,
+                numberPlate: numberPlate,
             }
         );
     };

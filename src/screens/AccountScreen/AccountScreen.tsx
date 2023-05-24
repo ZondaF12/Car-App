@@ -5,10 +5,20 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Application from "expo-application";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import Purchases from "react-native-purchases";
 import { database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 import { useAuth } from "../../contexts/AuthContext";
+import useRevenueCat from "../../hooks/useRevenueCat";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -40,10 +50,14 @@ const AccountScreen = () => {
     const [joinedDate, setJoinedDate] = useState<any>("");
     const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
     const [isUsingDeviceSettings, setIsUsingDeviceSettings] = useState(false);
-    const [userAccountType, setUserAccountType] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const { userSignOut, getUser } = useAuth();
 
+    const { isProMember, currentOffering } = useRevenueCat();
+
     const checkUser = async () => {
+        setIsLoading(true);
+
         const authUser = await getUser();
 
         const res = doc(database, "users", authUser.uid);
@@ -63,7 +77,7 @@ const AccountScreen = () => {
         );
 
         setUserName(docData?.name);
-        setUserAccountType(docData?.accountType);
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -83,6 +97,27 @@ const AccountScreen = () => {
         setIsUsingDeviceSettings((previousState) => !previousState);
     };
 
+    const handleShowUserPurchases = async () => {
+        navigation.navigate("UserPurchases");
+    };
+
+    const handlePurchasePro = async () => {
+        if (!currentOffering?.monthly) return;
+        const purchaseInfo = await Purchases.purchasePackage(
+            currentOffering.monthly
+        );
+
+        console.log(purchaseInfo.customerInfo.entitlements.active);
+    };
+
+    if (!userName || isLoading) {
+        return (
+            <SafeAreaView className="flex-1 bg-[#1e2128] items-center justify-center">
+                <ActivityIndicator size="large" color="#6c5dd2" />
+            </SafeAreaView>
+        );
+    }
+
     return (
         <View className="flex-1 bg-[#1e2128]">
             <ScrollView className="mt-2">
@@ -100,18 +135,34 @@ const AccountScreen = () => {
                             {userName}
                         </Text>
                         <Text className="text-[#6c5dd2] text-sm font-bold">
-                            {userAccountType}
+                            {isProMember ? "PRO" : "FREE"}
                         </Text>
                     </View>
                     <Text className="text-base text-[#707175] pt-3">
                         Member Since
                     </Text>
                     <Text className="text-lg text-white">{joinedDate}</Text>
+
+                    {isProMember ? (
+                        ""
+                    ) : (
+                        <TouchableOpacity
+                            className="mt-6"
+                            onPress={handlePurchasePro}
+                        >
+                            <Text className="font-bold text-lg text-[#6c5dd2]">
+                                Upgrade To Pro
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
                 <View className="px-8 pt-8 pb-2">
                     <Text className="text-[#707175] text-lg">APP SETTINGS</Text>
                 </View>
-                <SettingsButton label="Purchases" />
+                <SettingsButton
+                    label="Purchases"
+                    onPress={handleShowUserPurchases}
+                />
                 <SettingsButton
                     label="Appearance"
                     onPress={() => appearanceBottomSheetRef?.current?.expand()}

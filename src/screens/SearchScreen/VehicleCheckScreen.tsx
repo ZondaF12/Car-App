@@ -87,7 +87,11 @@ const VehicleCheckScreen = ({ route }: any) => {
                         />
                         <TableFields
                             title="CO2 Emissions"
-                            data={`${vehicleDetails.co2Emissions} g/km`}
+                            data={
+                                vehicleDetails?.co2Emissions
+                                    ? `${vehicleDetails?.co2Emissions} g/km`
+                                    : undefined
+                            }
                         />
                         <TableFields
                             title="Fuel Type"
@@ -114,7 +118,7 @@ const VehicleCheckScreen = ({ route }: any) => {
                             data={
                                 vehicleDetails.euroStatus
                                     ? vehicleDetails.euroStatus
-                                    : "Unknown"
+                                    : undefined
                             }
                             lastRow
                         />

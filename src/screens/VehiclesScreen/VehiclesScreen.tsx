@@ -27,11 +27,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SwitchSelector, {
     ISwitchSelectorOption,
 } from "react-native-switch-selector";
-import { database } from "../../../firebase";
+import { auth, database } from "../../../firebase";
 import ProfilePictureCircle from "../../components/ProfilePictureCircle";
 import VehicleInfo from "../../components/VehicleInfo";
 import VehicleInfoFleet from "../../components/VehicleInfoFleet";
 import { useAuth } from "../../contexts/AuthContext";
+import useRevenueCat from "../../hooks/useRevenueCat";
 import addNewVehicle from "../../tools/addNewVehicle";
 import refreshVehicleDetails from "../../tools/refreshVehicleDetails";
 import { RootStackParamList } from "../../types/rootStackParamList";
@@ -53,9 +54,10 @@ const VehiclesScreen = ({ navigation }: any) => {
     >("default");
     const [location, setLocation] = useState("");
     const { getUser, getUserName } = useAuth();
+    const { isProMember } = useRevenueCat();
 
     const checkUserVehicles = async () => {
-        const curUser = await getUser();
+        const curUser = auth.currentUser!;
 
         setUserVehicles([]);
 
@@ -81,7 +83,7 @@ const VehiclesScreen = ({ navigation }: any) => {
         if (!userName) {
             getUserDisplayName();
         }
-    }, [navigation.isFocused()]);
+    }, [!userName]);
 
     useEffect(() => {
         const getUserLocation = async () => {
@@ -96,8 +98,9 @@ const VehiclesScreen = ({ navigation }: any) => {
     }, []);
 
     useEffect(() => {
+        const curUser = auth.currentUser!;
         const q = query(
-            collection(database, "users", getUser().uid, "userVehicles"),
+            collection(database, "users", curUser.uid, "userVehicles"),
             orderBy("createdAt")
         );
 
@@ -132,6 +135,15 @@ const VehiclesScreen = ({ navigation }: any) => {
     }, [userVehiclesLoaded]);
 
     const onAddNewVehicle = async (numberPlate: string) => {
+        if (!isProMember) {
+            if (userVehicles.length >= 2) {
+                Alert.alert(
+                    "Please Upgrade to PRO to add more than 2 vehicles to your garage"
+                );
+                setModalVisible(false);
+                return;
+            }
+        }
         setIsLoading(true);
         setModalVisible(false);
 
@@ -167,7 +179,7 @@ const VehiclesScreen = ({ navigation }: any) => {
         setVehicleView(view);
     };
 
-    if (isLoading || !userName) {
+    if (isLoading) {
         return (
             <SafeAreaView className="flex-1 bg-[#1e2128] items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />
@@ -254,9 +266,20 @@ const VehiclesScreen = ({ navigation }: any) => {
                 <View className="flex-row mb-4 space-x-8 items-center pt-8">
                     <ProfilePictureCircle name={userName} />
                     <View>
-                        <Text className="text-white text-xl">
-                            {userName.toLocaleUpperCase()}
-                        </Text>
+                        <View className="flex-row items-center space-x-2">
+                            <Text className="text-white text-xl">
+                                {userName}
+                            </Text>
+                            {isProMember ? (
+                                <AntDesign
+                                    name="star"
+                                    size={18}
+                                    color="#6c5dd2"
+                                />
+                            ) : (
+                                ""
+                            )}
+                        </View>
                         <View className="pt-2 space-y-0.5">
                             {location ? (
                                 <View className="flex-row items-center space-x-1">

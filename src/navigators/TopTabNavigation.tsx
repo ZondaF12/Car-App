@@ -23,7 +23,6 @@ function MyTabs(props: any) {
     useEffect(() => {
         const getInfo = async () => {
             const res = await getVehicleDetails(props.numberPlate);
-            console.log(res);
 
             await setStates(res);
         };

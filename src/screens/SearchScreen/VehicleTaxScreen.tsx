@@ -29,7 +29,8 @@ const taxPriceOld: any = {
 const VehicleTaxScreen = ({ route }: any) => {
     const [newDate, setNewDate] = useState("");
     const [dayDifference, setDayDifference] = useState("");
-    const [taxPrice, setTaxPrice] = useState("");
+    const [taxPrice, setTaxPrice] = useState<number | undefined>();
+    const [isNewTax, setIsNewTax] = useState(false);
     const { taxStatus, dueDate, co2Emissions, registered, fuelType } =
         route.params;
 
@@ -58,7 +59,7 @@ const VehicleTaxScreen = ({ route }: any) => {
 
         const findTaxPrice = async (emission: number, registered: string) => {
             if (isNaN(emission)) {
-                setTaxPrice("Unknown");
+                setTaxPrice(undefined);
                 return;
             }
 
@@ -74,6 +75,7 @@ const VehicleTaxScreen = ({ route }: any) => {
                     }
                 }
             } else {
+                setIsNewTax(true);
                 if (co2Emissions > 0 && fuelType != "ELECTRICITY") {
                     if (fuelType === "PETROL" || fuelType === "DIESEL") {
                         taxPricing = "£180";
@@ -116,7 +118,13 @@ const VehicleTaxScreen = ({ route }: any) => {
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4 mt-5">
                     <Text className="text-white text-base">12 Month Tax</Text>
-                    <Text className="text-white text-base">{taxPrice}*</Text>
+                    <Text className="text-white text-base">
+                        {taxPrice
+                            ? isNewTax
+                                ? `${taxPrice}*`
+                                : taxPrice
+                            : "-"}
+                    </Text>
                 </View>
             </View>
             <View className="w-[90%] bg-[#33343b] p-2 mt-4">
@@ -126,15 +134,13 @@ const VehicleTaxScreen = ({ route }: any) => {
             <View className="flex-row justify-between w-[90%] px-4 py-2 bg-[#33343b]">
                 <Text className="text-white text-base">CO2 Emissions</Text>
                 <Text className="text-white text-base">
-                    {co2Emissions >= 0 ? co2Emissions + " g/km" : "Unknown"}
+                    {co2Emissions >= 0 ? co2Emissions + " g/km" : "-"}
                 </Text>
             </View>
             <Text className="text-white mt-4 text-xs text-left w-[90%] px-4 font-extralight">
-                *As of March 2017, if your new car had a list price of £40,000
-                or more, you’ll pay additional rate tax, or premium car tax,
-                which is £355, or £535 per year in total (£180 + £355). You’ll
-                pay this rate for five years (from the second time the vehicle
-                is taxed).
+                {isNewTax
+                    ? "*As of March 2017, if your new car had a list price of £40,000 or more, you’ll pay additional rate tax, or premium car tax, which is £355, or £535 per year in total (£180 + £355). You’ll pay this rate for five years (from the second time the vehicle is taxed)."
+                    : ""}
             </Text>
         </SafeAreaView>
     );

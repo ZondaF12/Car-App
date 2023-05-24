@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 
 type Props = {
     title: string;
-    data: string;
+    data: string | undefined;
     lastRow?: boolean;
 };
 

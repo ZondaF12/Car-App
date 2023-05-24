@@ -173,7 +173,7 @@ const SearchScreen = ({ navigation }: any) => {
                     ></TextInput>
                 </View>
             </View>
-            <View className="w-[90%] max-h-[73%] shadow-xl rounded-lg bg-[#242731]">
+            <View className="w-[90%] max-h-[72%] shadow-xl rounded-lg bg-[#242731]">
                 <View className="flex-row justify-between">
                     <View className="px-6 py-6">
                         <Text className="text-white text-xl">

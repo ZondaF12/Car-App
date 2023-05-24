@@ -10,6 +10,7 @@ import { AuthProvider } from "./src/contexts/AuthContext";
 import BottomNavNavigator from "./src/navigators/BottomTabNavigation";
 import TopBarNavigator from "./src/navigators/TopTabNavigation";
 import EditProfileScreen from "./src/screens/AccountScreen/EditProfileScreen";
+import PurchasesScreen from "./src/screens/AccountScreen/PurchasesScreen";
 import LoginScreen from "./src/screens/AuthScreen/LoginScreen";
 import RegisterScreen from "./src/screens/AuthScreen/RegisterScreen";
 import VehicleMotTestResultScreen from "./src/screens/SearchScreen/VehicleMotTestResultScreen";
@@ -216,6 +217,36 @@ const App = () => {
                         name="VehicleMotResults"
                         component={VehicleMotTestResultScreen}
                         options={{ headerShown: false, presentation: "modal" }}
+                    />
+                    <Stack.Screen
+                        name="FullReport"
+                        component={TopBarNavigator}
+                        options={({ route }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: route.params?.params?.numberPlate,
+                        })}
+                    />
+                    <Stack.Screen
+                        name="UserPurchases"
+                        component={PurchasesScreen}
+                        options={{
+                            headerStyle: {
+                                backgroundColor: "#1e2128",
+                            },
+                            headerTintColor: "#fff",
+                            headerTitleStyle: {
+                                fontWeight: "bold",
+                            },
+                            headerBackTitleVisible: false,
+                            headerTitle: "Purchases",
+                        }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

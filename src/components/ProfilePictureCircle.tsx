@@ -17,7 +17,7 @@ const ProfilePictureCircle = ({ name }: Props) => {
     return (
         <View className="h-20 w-20 rounded-full border-2 border-white items-center justify-center">
             <Text className="text-white text-2xl">
-                {getInitials(name).toLocaleUpperCase()}
+                {name ? getInitials(name).toLocaleUpperCase() : ""}
             </Text>
         </View>
     );
