@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { AdsConsent, AdsConsentStatus } from "react-native-google-mobile-ads";
 import { auth } from "./firebase";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import BottomNavNavigator from "./src/navigators/BottomTabNavigation";
@@ -81,6 +82,21 @@ const App = () => {
                 responseListener.current
             );
         };
+    }, []);
+
+    useEffect(() => {
+        const getConsent = async () => {
+            const consentInfo = await AdsConsent.requestInfoUpdate();
+
+            if (
+                consentInfo.isConsentFormAvailable &&
+                consentInfo.status === AdsConsentStatus.REQUIRED
+            ) {
+                const { status } = await AdsConsent.showForm();
+            }
+        };
+
+        getConsent();
     }, []);
 
     const checkUser = async (user: any) => {

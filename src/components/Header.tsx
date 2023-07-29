@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useAuth } from "../contexts/AuthContext";
 
 type Props = {
     screen: string;
@@ -16,31 +15,30 @@ function getInitials(name: any) {
 
 const Header = ({ screen }: Props) => {
     const [userName, setUserName] = useState("");
-    const { getUser, getUserName } = useAuth();
 
-    useEffect(() => {
-        const getUserDisplayName = async () => {
-            setUserName(await getUserName());
-        };
+    // useEffect(() => {
+    //     const getUserDisplayName = async () => {
+    //         setUserName(await getUserName());
+    //     };
 
-        if (!userName) {
-            getUserDisplayName();
-        }
-    }, []);
+    //     if (!userName) {
+    //         getUserDisplayName();
+    //     }
+    // }, []);
 
     return (
         <View className="w-full flex-row justify-between items-center px-4 ">
-            <TouchableOpacity className="h-8 w-8 rounded-full border-2 border-white items-center justify-center">
-                <Text className="text-white text-sm">
-                    {userName ? getInitials(userName).toLocaleUpperCase() : ""}
-                </Text>
-            </TouchableOpacity>
-
             <View className="items-center justify-center">
                 <Text className="text-center text-white text-base">
                     {screen}
                 </Text>
             </View>
+
+            <TouchableOpacity className="h-8 w-8 items-center justify-center">
+                <Text className="text-white text-sm">
+                    {/* {userName ? getInitials(userName).toLocaleUpperCase() : ""} */}
+                </Text>
+            </TouchableOpacity>
         </View>
     );
 };

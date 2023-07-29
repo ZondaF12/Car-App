@@ -3,12 +3,11 @@ import { useIsFocused } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
-    deleteDoc,
     doc,
-    getDocs,
     onSnapshot,
     orderBy,
     query,
+    writeBatch,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -21,6 +20,7 @@ import {
     View,
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
+import { TestIds, useInterstitialAd } from "react-native-google-mobile-ads";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, database } from "../../../firebase";
 import SearchHistory from "../../components/SearchHistory";
@@ -45,21 +45,44 @@ const SearchScreen = ({ navigation }: any) => {
     const [searchPlate, setSearchPlate] = useState("");
     const { getUser } = useAuth();
 
-    const checkSearchHistory = async () => {
-        const curUser = await getUser();
-        const searchHistoryQuery = await getDocs(
-            query(
-                collection(database, "users", curUser?.uid, "searchHistory"),
-                orderBy("createdAt", "desc")
-            )
-        );
+    const { isLoaded, isClosed, load, show } = useInterstitialAd(
+        TestIds.INTERSTITIAL,
+        {
+            requestNonPersonalizedAdsOnly: true,
+        }
+    );
 
-        searchHistoryQuery.forEach((QueryDocumentSnapshot) => {
-            setSearchHistory((searchHistory: any) =>
-                searchHistory.concat(QueryDocumentSnapshot.data())
-            );
-        });
-    };
+    useEffect(() => {
+        // Start loading the interstitial straight away
+        load();
+    }, [load]);
+
+    useEffect(() => {
+        if (isClosed) {
+            navigation.navigate("VehicleCheck", {
+                screen: "VehicleCheck",
+                params: {
+                    numberPlate: searchPlate.replace(/\s/g, ""),
+                },
+            });
+        }
+    }, [isClosed, navigation]);
+
+    // const checkSearchHistory = async () => {
+    //     const curUser = await getUser();
+    //     const searchHistoryQuery = await getDocs(
+    //         query(
+    //             collection(database, "users", curUser?.uid, "searchHistory"),
+    //             orderBy("createdAt", "desc")
+    //         )
+    //     );
+
+    //     searchHistoryQuery.forEach((QueryDocumentSnapshot) => {
+    //         setSearchHistory((searchHistory: any) =>
+    //             searchHistory.concat(QueryDocumentSnapshot.data())
+    //         );
+    //     });
+    // };
 
     useEffect(() => {
         setSearchPlate("");
@@ -92,7 +115,7 @@ const SearchScreen = ({ navigation }: any) => {
 
     const onClearSearchHistory = async () => {
         Alert.alert(
-            "Deleting a Vehicle",
+            "Clear your history",
             `Are you sure you want to clear your search history?`,
             [
                 {
@@ -110,8 +133,9 @@ const SearchScreen = ({ navigation }: any) => {
 
     const clearSearchHistory = async () => {
         const curUser = await getUser();
+        const batch = writeBatch(database);
         for (let vehicle in searchHistory) {
-            await deleteDoc(
+            batch.delete(
                 doc(
                     database,
                     "users",
@@ -121,7 +145,11 @@ const SearchScreen = ({ navigation }: any) => {
                 )
             );
         }
+
+        await batch.commit();
     };
+
+    const onSearch = async () => {};
 
     if (isLoading) {
         return (
@@ -154,17 +182,22 @@ const SearchScreen = ({ navigation }: any) => {
                         placeholder="AA00 AAA"
                         style={{ fontSize: 18 }}
                         autoCapitalize={"characters"}
-                        onSubmitEditing={(event) =>
-                            navigation.navigate("VehicleCheck", {
-                                screen: "VehicleCheck",
-                                params: {
-                                    numberPlate: event.nativeEvent.text.replace(
-                                        /\s/g,
-                                        ""
-                                    ),
-                                },
-                            })
-                        }
+                        onSubmitEditing={(event) => {
+                            if (isLoaded) {
+                                show();
+                            } else {
+                                navigation.navigate("VehicleCheck", {
+                                    screen: "VehicleCheck",
+                                    params: {
+                                        numberPlate:
+                                            event.nativeEvent.text.replace(
+                                                /\s/g,
+                                                ""
+                                            ),
+                                    },
+                                });
+                            }
+                        }}
                         autoCorrect={false}
                         value={searchPlate}
                         onChangeText={(numberPlate) => {

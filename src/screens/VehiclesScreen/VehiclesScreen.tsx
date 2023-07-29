@@ -32,7 +32,6 @@ import ProfilePictureCircle from "../../components/ProfilePictureCircle";
 import VehicleInfo from "../../components/VehicleInfo";
 import VehicleInfoFleet from "../../components/VehicleInfoFleet";
 import { useAuth } from "../../contexts/AuthContext";
-import useRevenueCat from "../../hooks/useRevenueCat";
 import addNewVehicle from "../../tools/addNewVehicle";
 import refreshVehicleDetails from "../../tools/refreshVehicleDetails";
 import { RootStackParamList } from "../../types/rootStackParamList";
@@ -53,8 +52,7 @@ const VehiclesScreen = ({ navigation }: any) => {
         string | number | ISwitchSelectorOption
     >("default");
     const [location, setLocation] = useState("");
-    const { getUser, getUserName } = useAuth();
-    const { isProMember } = useRevenueCat();
+    const { getUser, getUserName, user } = useAuth();
 
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
@@ -77,13 +75,19 @@ const VehiclesScreen = ({ navigation }: any) => {
 
     useEffect(() => {
         const getUserDisplayName = async () => {
-            setUserName(await getUserName());
+            const curUserName = await getUser();
+            if (!curUserName.displayName) {
+                const displayInitial = await getUserName();
+                setUserName(displayInitial);
+            } else {
+                setUserName(curUserName.displayName);
+            }
         };
 
         if (!userName) {
             getUserDisplayName();
         }
-    }, [!userName]);
+    }, []);
 
     useEffect(() => {
         const getUserLocation = async () => {
@@ -135,15 +139,15 @@ const VehiclesScreen = ({ navigation }: any) => {
     }, [userVehiclesLoaded]);
 
     const onAddNewVehicle = async (numberPlate: string) => {
-        if (!isProMember) {
-            if (userVehicles.length >= 2) {
-                Alert.alert(
-                    "Please Upgrade to PRO to add more than 2 vehicles to your garage"
-                );
-                setModalVisible(false);
-                return;
-            }
-        }
+        // if (!isProMember) {
+        //     if (userVehicles.length >= 2) {
+        //         Alert.alert(
+        //             "Please Upgrade to PRO to add more than 2 vehicles to your garage"
+        //         );
+        //         setModalVisible(false);
+        //         return;
+        //     }
+        // }
         setIsLoading(true);
         setModalVisible(false);
 
@@ -270,7 +274,7 @@ const VehiclesScreen = ({ navigation }: any) => {
                             <Text className="text-white text-xl">
                                 {userName}
                             </Text>
-                            {isProMember ? (
+                            {/* {isProMember ? (
                                 <AntDesign
                                     name="star"
                                     size={18}
@@ -278,10 +282,10 @@ const VehiclesScreen = ({ navigation }: any) => {
                                 />
                             ) : (
                                 ""
-                            )}
+                            )} */}
                         </View>
                         <View className="pt-2 space-y-0.5">
-                            {location ? (
+                            {/* {location ? (
                                 <View className="flex-row items-center space-x-1">
                                     <MaterialIcons
                                         name="location-on"
@@ -294,7 +298,7 @@ const VehiclesScreen = ({ navigation }: any) => {
                                 </View>
                             ) : (
                                 ""
-                            )}
+                            )} */}
 
                             <View className="flex-row items-center space-x-1">
                                 <MaterialIcons

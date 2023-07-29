@@ -101,7 +101,9 @@ const VehicleMotScreen = ({ route }: any) => {
                     <Text className="text-white text-base">{carMotDate}</Text>
                 </View>
                 <View className="h-8 items-center flex-row justify-between px-4">
-                    <Text className="text-white text-base">Expires</Text>
+                    <Text className="text-white text-base">
+                        {+dayDifference > 0 ? "Expires In" : "Expired"}
+                    </Text>
                     <Text className="text-white text-base">
                         {+dayDifference > 0
                             ? `${dayDifference} Days`

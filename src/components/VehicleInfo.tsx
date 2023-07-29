@@ -55,7 +55,7 @@ const VehicleInfo = ({
     return (
         <View className="h-48 shadow-xl rounded-lg bg-[#242731] mb-4">
             <View className="flex-row items-center basis-[60%]">
-                <View className="px-4 items-start py-2 mr-auto">
+                <View className="px-4 items-start py-2 mr-auto w-[85%]">
                     <Text
                         className="text-[#6c5dd2] text-3xl uppercase font-bold"
                         maxFontSizeMultiplier={1.1}
@@ -69,8 +69,9 @@ const VehicleInfo = ({
                         {make}
                     </Text>
                     <Text
-                        className="text-[#707175] text-xl uppercase font-bold"
+                        className="text-[#707175] text-xl uppercase font-bold truncate"
                         maxFontSizeMultiplier={1.1}
+                        numberOfLines={1}
                     >
                         {model}
                     </Text>

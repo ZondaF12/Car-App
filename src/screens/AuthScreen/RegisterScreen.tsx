@@ -3,7 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
-import { sendEmailVerification, updateProfile } from "firebase/auth";
+import { sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
@@ -48,7 +48,11 @@ const RegisterScreen = () => {
         }
         setLoading(true);
         try {
-            const newUser = await userSignUp(registerEmail, registerPassword);
+            const newUser = await userSignUp(
+                registerEmail,
+                registerPassword,
+                name
+            );
 
             const { status } = await Location.getForegroundPermissionsAsync();
 
@@ -61,12 +65,8 @@ const RegisterScreen = () => {
                 );
             }
 
-            await updateProfile(newUser.user, {
-                displayName: name,
-            });
-
-            await setDoc(doc(database, "users", newUser.user.uid), {
-                email: newUser.user.email,
+            await setDoc(doc(database, "users", newUser.uid), {
+                email: newUser.email,
                 name: name,
                 accountType: "FREE",
                 location: getAddress
@@ -74,7 +74,7 @@ const RegisterScreen = () => {
                     : "",
             });
 
-            await sendEmailVerification(newUser.user);
+            await sendEmailVerification(newUser);
         } catch (err: any) {
             Alert.alert(err.message);
         }

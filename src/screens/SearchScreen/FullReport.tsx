@@ -1,9 +1,7 @@
-import { REVENUECAT_APPLE } from "@env";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import React from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import Purchases from "react-native-purchases";
 import { database } from "../../../firebase";
 import FullCheckList from "../../components/FullCheckList";
 import { useAuth } from "../../contexts/AuthContext";
@@ -53,23 +51,23 @@ const FullReport = ({ route }: any) => {
     };
 
     const purchaseReport = async () => {
-        await Purchases.configure({ apiKey: REVENUECAT_APPLE });
-        const purchaserInfo = await Purchases.purchaseProduct("vehicle_report");
-        console.log(purchaserInfo);
-        await setDoc(
-            doc(
-                database,
-                "users",
-                await getUser().uid,
-                "purchases",
-                numberPlate
-            ),
-            {
-                purchaseDate:
-                    purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,
-                numberPlate: numberPlate,
-            }
-        );
+        // await Purchases.configure({ apiKey: REVENUECAT_APPLE });
+        // const purchaserInfo = await Purchases.purchaseProduct("vehicle_report");
+        // console.log(purchaserInfo);
+        // await setDoc(
+        //     doc(
+        //         database,
+        //         "users",
+        //         await getUser().uid,
+        //         "purchases",
+        //         numberPlate
+        //     ),
+        //     {
+        //         purchaseDate:
+        //             purchaserInfo.customerInfo.allPurchaseDates.vehicle_report,
+        //         numberPlate: numberPlate,
+        //     }
+        // );
     };
 
     return (

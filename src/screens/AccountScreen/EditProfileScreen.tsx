@@ -1,11 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Location from "expo-location";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { database } from "../../../firebase";
+import { auth, database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 import { useAuth } from "../../contexts/AuthContext";
 import { RootStackParamList } from "../../types/rootStackParamList";
@@ -20,6 +21,7 @@ const EditProfileScreen = () => {
     const [userName, setUserName] = useState("");
     const [userEmail, setUserEmail] = useState("");
     const [currentName, setCurrentName] = useState("");
+    const [location, setLocation] = useState("");
     const { getUser } = useAuth();
 
     useEffect(() => {
@@ -33,6 +35,7 @@ const EditProfileScreen = () => {
             setUserName(userData?.name);
             setUserEmail(userData?.email);
             setCurrentName(userData?.name);
+            setLocation(userData?.location);
         };
 
         handleGetUser();
@@ -69,6 +72,28 @@ const EditProfileScreen = () => {
             ]
         );
     };
+
+    const setCurrentLocation = async () => {
+        const authUser = auth.currentUser!;
+
+        const { status } = await Location.getForegroundPermissionsAsync();
+
+        let getAddress: Location.LocationGeocodedAddress[] | undefined;
+
+        if (status === "granted") {
+            const location = await Location.getCurrentPositionAsync({});
+            getAddress = await Location.reverseGeocodeAsync(location.coords);
+        }
+
+        console.log(getAddress);
+
+        await updateDoc(doc(database, "users", authUser.uid), {
+            location: getAddress
+                ? `${getAddress[0].city}, ${getAddress[0].country}`
+                : "",
+        });
+    };
+
     const deleteCurrentUser = async () => {};
 
     return (
@@ -108,6 +133,23 @@ const EditProfileScreen = () => {
                             Email Address
                         </Text>
                         <Text className="text-lg text-white">{userEmail}</Text>
+                    </View>
+                    <View className="pt-4">
+                        <Text className="text-sm text-[#707175]">Location</Text>
+                        {location ? (
+                            <Text className="text-lg text-white">
+                                {location}
+                            </Text>
+                        ) : (
+                            <TouchableOpacity
+                                className="text-lg text-white"
+                                onPress={setCurrentLocation}
+                            >
+                                <Text className="font-bold text-lg text-[#6c5dd2]">
+                                    Add Location
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>

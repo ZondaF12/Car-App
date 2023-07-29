@@ -14,11 +14,9 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import Purchases from "react-native-purchases";
 import { database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 import { useAuth } from "../../contexts/AuthContext";
-import useRevenueCat from "../../hooks/useRevenueCat";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -53,11 +51,9 @@ const AccountScreen = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { userSignOut, getUser } = useAuth();
 
-    const { isProMember, currentOffering } = useRevenueCat();
+    // const { isProMember, currentOffering } = useRevenueCat();
 
     const checkUser = async () => {
-        setIsLoading(true);
-
         const authUser = await getUser();
 
         const res = doc(database, "users", authUser.uid);
@@ -77,7 +73,6 @@ const AccountScreen = () => {
         );
 
         setUserName(docData?.name);
-        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -101,14 +96,14 @@ const AccountScreen = () => {
         navigation.navigate("UserPurchases");
     };
 
-    const handlePurchasePro = async () => {
-        if (!currentOffering?.monthly) return;
-        const purchaseInfo = await Purchases.purchasePackage(
-            currentOffering.monthly
-        );
+    // const handlePurchasePro = async () => {
+    //     if (!currentOffering?.monthly) return;
+    //     const purchaseInfo = await Purchases.purchasePackage(
+    //         currentOffering.monthly
+    //     );
 
-        console.log(purchaseInfo.customerInfo.entitlements.active);
-    };
+    //     console.log(purchaseInfo.customerInfo.entitlements.active);
+    // };
 
     if (!userName || isLoading) {
         return (
@@ -135,7 +130,7 @@ const AccountScreen = () => {
                             {userName}
                         </Text>
                         <Text className="text-[#6c5dd2] text-sm font-bold">
-                            {isProMember ? "PRO" : "FREE"}
+                            {/* {isProMember ? "PRO" : "FREE"} */}
                         </Text>
                     </View>
                     <Text className="text-base text-[#707175] pt-3">
@@ -143,7 +138,7 @@ const AccountScreen = () => {
                     </Text>
                     <Text className="text-lg text-white">{joinedDate}</Text>
 
-                    {isProMember ? (
+                    {/* {isProMember ? (
                         ""
                     ) : (
                         <TouchableOpacity
@@ -154,7 +149,7 @@ const AccountScreen = () => {
                                 Upgrade To Pro
                             </Text>
                         </TouchableOpacity>
-                    )}
+                    )} */}
                 </View>
                 <View className="px-8 pt-8 pb-2">
                     <Text className="text-[#707175] text-lg">APP SETTINGS</Text>
@@ -163,11 +158,11 @@ const AccountScreen = () => {
                     label="Purchases"
                     onPress={handleShowUserPurchases}
                 />
-                <SettingsButton
+                {/* <SettingsButton
                     label="Appearance"
                     onPress={() => appearanceBottomSheetRef?.current?.expand()}
                 />
-                <SettingsButton label="Security" />
+                <SettingsButton label="Security" /> */}
                 <View className="px-8 pt-8 pb-2">
                     <Text className="text-[#707175] text-lg">LEGAL</Text>
                 </View>

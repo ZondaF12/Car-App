@@ -7,8 +7,9 @@ import {
     getAdditionalUserInfo,
     signInWithCredential,
     signInWithEmailAndPassword,
+    updateProfile,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, database } from "../../firebase";
 import signInWithApple from "../tools/signInWithApple";
@@ -22,7 +23,8 @@ export function useAuth() {
 WebBrowser.maybeCompleteAuthSession();
 
 export function AuthProvider({ children }: any) {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState<any>();
+    const [userName, setUserName] = useState<any>();
 
     const [request, response, promptAsync]: any = Google.useAuthRequest({
         iosClientId: IOS_CLIENT_ID,
@@ -60,11 +62,30 @@ export function AuthProvider({ children }: any) {
     }
 
     function userSignOut() {
+        setUserName("");
         return auth.signOut();
     }
 
-    async function userSignUp(email: string, password: string) {
-        return await createUserWithEmailAndPassword(auth, email, password);
+    async function userSignUp(
+        email: string,
+        password: string,
+        displayName: string
+    ) {
+        setUserName(displayName);
+
+        const { user } = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        await updateProfile(user, {
+            displayName: displayName.toString(),
+        });
+
+        setUser(user);
+
+        return user;
     }
 
     async function googleLogin() {
@@ -84,15 +105,15 @@ export function AuthProvider({ children }: any) {
     }
 
     function getUser() {
+        if (!auth.currentUser?.displayName) {
+            auth.currentUser!.reload();
+        }
+
         return auth.currentUser;
     }
 
     async function getUserName() {
-        const res = doc(database, "users", auth.currentUser?.uid!);
-        const getUserName = await getDoc(res);
-        const docData = getUserName.data();
-
-        return docData?.name;
+        return userName;
     }
 
     const checkUser = async (user: any) => {
