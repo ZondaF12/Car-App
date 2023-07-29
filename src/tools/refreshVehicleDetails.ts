@@ -1,25 +1,29 @@
 import * as Notifications from "expo-notifications";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, database } from "../../firebase";
-import { getMotDetails } from "./getMotDetails";
-import { getVehicleDetails } from "./getVehicleDetails";
+import { auth, database, functions } from "../../firebase";
 import schedulePushNotification from "./notifications/scheduleNotification";
+import { httpsCallable } from "firebase/functions";
 
 const refreshVehicleDetails = async (userVehicles: any) => {
     for (let vehicle in userVehicles) {
         try {
-            const res = await getVehicleDetails(
-                userVehicles[vehicle].numberPlate
-            );
+            const getVehicleData = httpsCallable(functions, "getVehicleData");
 
-            let newMotDate = new Date(res?.motExpiryDate);
-            let newTaxDate: any = new Date(res?.taxDueDate);
+            const res: any = await getVehicleData({
+                numberPlate: userVehicles[vehicle].numberPlate,
+            });
 
-            if (!res?.motExpiryDate) {
-                const motRes = await getMotDetails(
-                    userVehicles[vehicle].numberPlate
-                );
-                newMotDate = new Date(motRes[0].motTestExpiryDate);
+            let newMotDate = new Date(res?.data?.motExpiryDate);
+            let newTaxDate: any = new Date(res?.data?.taxDueDate);
+
+            if (!res?.data?.motExpiryDate) {
+                const getMotDetails = httpsCallable(functions, "getMotDetails");
+
+                const motRes: any = await getMotDetails({
+                    numberPlate: userVehicles[vehicle].numberPlate,
+                });
+
+                newMotDate = new Date(motRes.data[0].motTestExpiryDate);
             }
 
             const currentTaxDate = new Date(userVehicles[vehicle].taxDate);
@@ -34,7 +38,10 @@ const refreshVehicleDetails = async (userVehicles: any) => {
             const motDateChanged =
                 newMotDate.getTime() != currentMotDate.getTime();
 
-            if (userVehicles[vehicle].taxDate === "SORN" && !res?.taxDueDate) {
+            if (
+                userVehicles[vehicle].taxDate === "SORN" &&
+                !res?.data?.taxDueDate
+            ) {
                 newTaxDate = "SORN";
             }
             /* If true this will then update the values that have been stored */

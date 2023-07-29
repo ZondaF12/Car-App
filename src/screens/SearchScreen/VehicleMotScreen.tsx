@@ -11,7 +11,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 import MotField from "../../components/MotField";
-import { getMotDetails } from "../../tools/getMotDetails";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "../../../firebase";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -26,8 +27,13 @@ const VehicleMotScreen = ({ route }: any) => {
 
     useEffect(() => {
         const checkMot = async () => {
-            const res = await getMotDetails(numberPlate);
-            setMotTests(res[0].motTests);
+            const getMotDetails = httpsCallable(functions, "getMotDetails");
+
+            const res: any = await getMotDetails({
+                numberPlate,
+            });
+
+            setMotTests(res.data[0].motTests);
 
             if (!motExpiry) {
                 const newCarDate = new Date(

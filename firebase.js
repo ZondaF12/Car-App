@@ -16,6 +16,7 @@ import {
     initializeAuth,
 } from "firebase/auth/react-native";
 import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -45,5 +46,6 @@ if (!getApps().length) {
     }
 }
 
+export const functions = getFunctions(app, "europe-west2");
 export const auth = getAuth(app);
 export const database = getFirestore(app);

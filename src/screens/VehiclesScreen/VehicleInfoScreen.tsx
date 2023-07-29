@@ -15,10 +15,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 import MotSvgComponent from "../../../assets/MotSvg";
-import { database } from "../../../firebase";
+import { database, functions } from "../../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
-import { getVehicleDetails } from "../../tools/getVehicleDetails";
 import schedulePushNotification from "../../tools/notifications/scheduleNotification";
+import { httpsCallable } from "firebase/functions";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -42,8 +42,13 @@ const VehicleInfoScreen = ({ route }: any) => {
         dateConverter(insuranceDate, "Insurance");
 
         const vehicleInfo = async () => {
-            const vehicleSearch = await getVehicleDetails(numberPlate);
-            setTaxInfo(vehicleSearch);
+            const getVehicleData = httpsCallable(functions, "getVehicleData");
+
+            const res = await getVehicleData({
+                numberPlate: numberPlate,
+            });
+
+            setTaxInfo(res.data);
         };
 
         vehicleInfo();

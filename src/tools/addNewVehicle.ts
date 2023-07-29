@@ -1,9 +1,8 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Alert } from "react-native";
-import { auth, database } from "../../firebase";
-import { getMotDetails } from "./getMotDetails";
-import { getVehicleDetails } from "./getVehicleDetails";
+import { auth, database, functions } from "../../firebase";
 import schedulePushNotification from "./notifications/scheduleNotification";
+import { httpsCallable } from "firebase/functions";
 
 const addNewVehicle = async (numberPlate: string) => {
     const curUser = auth.currentUser!;
@@ -27,22 +26,31 @@ const addNewVehicle = async (numberPlate: string) => {
 
     try {
         /* Search API's for vehicle plate */
-        const searchForVehicle = await getVehicleDetails(vehicleRegPlate);
-        const getExtraVehicleInfo = await getMotDetails(vehicleRegPlate);
+        const getVehicleData = httpsCallable(functions, "getVehicleData");
+
+        const searchForVehicle: any = await getVehicleData({
+            numberPlate: vehicleRegPlate,
+        });
+
+        const getMotDetails = httpsCallable(functions, "getMotDetails");
+
+        const getExtraVehicleInfo: any = await getMotDetails({
+            numberPlate: vehicleRegPlate,
+        });
 
         const newVehicle = {
-            taxDate: searchForVehicle.taxDueDate
-                ? new Date(searchForVehicle.taxDueDate).toISOString()
+            taxDate: searchForVehicle.data?.taxDueDate
+                ? new Date(searchForVehicle.data?.taxDueDate).toISOString()
                 : "SORN",
-            motDate: searchForVehicle.motExpiryDate
-                ? new Date(searchForVehicle.motExpiryDate).toISOString()
-                : getExtraVehicleInfo[0].motTestExpiryDate
+            motDate: searchForVehicle.data?.motExpiryDate
+                ? new Date(searchForVehicle.data?.motExpiryDate).toISOString()
+                : getExtraVehicleInfo.data[0].motTestExpiryDate
                 ? new Date(
-                      getExtraVehicleInfo[0].motTestExpiryDate
+                      getExtraVehicleInfo.data[0].motTestExpiryDate
                   ).toISOString()
                 : "",
-            make: searchForVehicle.make,
-            model: getExtraVehicleInfo[0].model,
+            make: searchForVehicle.data?.make,
+            model: getExtraVehicleInfo.data[0].model,
         };
 
         /* Setup the notifications for the new vehicle that has been added */

@@ -5,8 +5,9 @@ import FullReport from "../screens/SearchScreen/FullReport";
 import VehicleCheckScreen from "../screens/SearchScreen/VehicleCheckScreen";
 import VehicleMotScreen from "../screens/SearchScreen/VehicleMotScreen";
 import VehicleTaxScreen from "../screens/SearchScreen/VehicleTaxScreen";
-import { getVehicleDetails } from "../tools/getVehicleDetails";
 import { RootStackParamList } from "../types/rootStackParamList";
+import { functions } from "../../firebase";
+import { httpsCallable } from "firebase/functions";
 
 const TopTabs = createMaterialTopTabNavigator<RootStackParamList>();
 
@@ -22,9 +23,13 @@ function MyTabs(props: any) {
 
     useEffect(() => {
         const getInfo = async () => {
-            const res = await getVehicleDetails(props.numberPlate);
+            const getVehicleData = httpsCallable(functions, "getVehicleData");
 
-            await setStates(res);
+            const res = await getVehicleData({
+                numberPlate: props.numberPlate,
+            });
+
+            await setStates(res.data);
         };
 
         const setStates = async (res: any) => {
