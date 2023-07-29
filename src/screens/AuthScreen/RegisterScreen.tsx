@@ -2,7 +2,6 @@ import "@azure/core-asynciterator-polyfill";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Location from "expo-location";
 import { sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
@@ -30,15 +29,12 @@ export type NavigationProp = NativeStackNavigationProp<
 
 const RegisterScreen = () => {
     const navigation = useNavigation<NavigationProp>();
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [registerEmail, setRegisterEmail] = useState("");
     const [registerPassword, setRegisterPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [name, setName] = useState("");
-    const [dobLabel, setDobLabel] = useState("");
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<any>("");
-    const [userInfo, setUserInfo] = useState<any>(null);
     const { userSignUp, googleLogin, appleLogin } = useAuth();
 
     const registerPressed = async () => {
@@ -54,24 +50,10 @@ const RegisterScreen = () => {
                 name
             );
 
-            const { status } = await Location.getForegroundPermissionsAsync();
-
-            let getAddress: Location.LocationGeocodedAddress[] | undefined;
-
-            if (status === "granted") {
-                const location = await Location.getCurrentPositionAsync({});
-                getAddress = await Location.reverseGeocodeAsync(
-                    location.coords
-                );
-            }
-
             await setDoc(doc(database, "users", newUser.uid), {
                 email: newUser.email,
                 name: name,
                 accountType: "FREE",
-                location: getAddress
-                    ? `${getAddress[0].city}, ${getAddress[0].country}`
-                    : "",
             });
 
             await sendEmailVerification(newUser);
@@ -79,10 +61,6 @@ const RegisterScreen = () => {
             Alert.alert(err.message);
         }
         setLoading(false);
-    };
-
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
     };
 
     const onGoogleLoginPressed = async () => {

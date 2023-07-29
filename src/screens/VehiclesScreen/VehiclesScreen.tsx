@@ -51,7 +51,6 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [vehicleView, setVehicleView] = useState<
         string | number | ISwitchSelectorOption
     >("default");
-    const [location, setLocation] = useState("");
     const { getUser, getUserName, user } = useAuth();
 
     const checkUserVehicles = async () => {
@@ -87,18 +86,6 @@ const VehiclesScreen = ({ navigation }: any) => {
         if (!userName) {
             getUserDisplayName();
         }
-    }, []);
-
-    useEffect(() => {
-        const getUserLocation = async () => {
-            const res = doc(database, "users", getUser().uid);
-            const getUserData = await getDoc(res);
-            const userData = getUserData.data();
-
-            setLocation(userData?.location);
-        };
-
-        getUserLocation();
     }, []);
 
     useEffect(() => {
@@ -285,21 +272,6 @@ const VehiclesScreen = ({ navigation }: any) => {
                             )} */}
                         </View>
                         <View className="pt-2 space-y-0.5">
-                            {/* {location ? (
-                                <View className="flex-row items-center space-x-1">
-                                    <MaterialIcons
-                                        name="location-on"
-                                        size={20}
-                                        color="white"
-                                    />
-                                    <Text className="text-white text-center text-base">
-                                        {location}
-                                    </Text>
-                                </View>
-                            ) : (
-                                ""
-                            )} */}
-
                             <View className="flex-row items-center space-x-1">
                                 <MaterialIcons
                                     name="directions-car"

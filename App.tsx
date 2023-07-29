@@ -1,7 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Device from "expo-device";
-import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -107,14 +106,6 @@ const App = () => {
     useEffect(() => {
         const subscriber = auth.onAuthStateChanged(checkUser);
         return subscriber;
-    }, []);
-
-    useEffect(() => {
-        const getLocation = async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-        };
-
-        getLocation();
     }, []);
 
     if (isLoading) {
