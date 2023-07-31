@@ -1,8 +1,8 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { Alert } from "react-native";
 import { auth, database, functions } from "../../firebase";
 import schedulePushNotification from "./notifications/scheduleNotification";
-import { httpsCallable } from "firebase/functions";
 
 const addNewVehicle = async (numberPlate: string) => {
     const curUser = auth.currentUser!;

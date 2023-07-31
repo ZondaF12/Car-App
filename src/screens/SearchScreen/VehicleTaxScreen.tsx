@@ -1,8 +1,9 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
+import { ScrollView } from "react-native-gesture-handler";
 import TaxTable from "../../components/TaxTable";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -96,7 +97,10 @@ const VehicleTaxScreen = ({ route }: any) => {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-[#1e2128] items-center w-full">
+        <ScrollView
+            className="flex-1 bg-[#1e2128] w-full"
+            contentContainerStyle={{ alignItems: "center" }}
+        >
             <View className="w-[90%] mt-8">
                 <View className="h-8 items-center flex-row justify-between px-4">
                     <Text className="text-white text-base">Tax Status</Text>
@@ -144,7 +148,7 @@ const VehicleTaxScreen = ({ route }: any) => {
                     ? "*As of March 2017, if your new car had a list price of £40,000 or more, you’ll pay additional rate tax, or premium car tax, which is £355, or £535 per year in total (£180 + £355). You’ll pay this rate for five years (from the second time the vehicle is taxed)."
                     : ""}
             </Text>
-        </SafeAreaView>
+        </ScrollView>
     );
 };
 

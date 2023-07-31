@@ -1,9 +1,10 @@
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import ProgressCircle from "react-native-progress-circle";
 import MotSvgComponent from "../../assets/MotSvg";
+import TaxSvgComponent from "../../assets/TaxSvg";
 
 type Props = {
     numberPlate: string;
@@ -94,10 +95,10 @@ const VehicleInfoFleet = ({
                             shadowColor="#707175"
                             bgColor="#242731"
                         >
-                            <Entypo
-                                name="shield"
-                                size={24}
-                                color={taxPercent >= 83 ? "#ff754c" : "#fff"}
+                            <TaxSvgComponent
+                                color={motPercent >= 83 ? "#ff754c" : "#fff"}
+                                height={24}
+                                width={24}
                             />
                         </ProgressCircle>
                     </View>
@@ -114,8 +115,8 @@ const VehicleInfoFleet = ({
                             shadowColor="#707175"
                             bgColor="#242731"
                         >
-                            <MaterialIcons
-                                name="attach-money"
+                            <Entypo
+                                name="shield"
                                 size={24}
                                 color={
                                     insurancePercent >= 83 ? "#ff754c" : "#fff"

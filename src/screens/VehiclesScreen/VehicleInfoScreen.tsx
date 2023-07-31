@@ -14,11 +14,12 @@ import {
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
+import { httpsCallable } from "firebase/functions";
 import MotSvgComponent from "../../../assets/MotSvg";
+import TaxSvgComponent from "../../../assets/TaxSvg";
 import { database, functions } from "../../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import schedulePushNotification from "../../tools/notifications/scheduleNotification";
-import { httpsCallable } from "firebase/functions";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -220,9 +221,9 @@ const VehicleInfoScreen = ({ route }: any) => {
                     className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8"
                     onPress={onTaxPress}
                 >
-                    <Entypo
-                        name="shield"
-                        size={48}
+                    <TaxSvgComponent
+                        height={48}
+                        width={48}
                         color={taxPercent >= 83 ? "#ff754c" : "#fff"}
                     />
                     <View className="space-y-4">
@@ -237,8 +238,8 @@ const VehicleInfoScreen = ({ route }: any) => {
                     </View>
                 </TouchableOpacity>
                 <View className="bg-[#242731] w-[90%] h-32 rounded-lg p-4 flex-row items-center space-x-8">
-                    <MaterialIcons
-                        name="attach-money"
+                    <Entypo
+                        name="shield"
                         size={48}
                         color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
                     />

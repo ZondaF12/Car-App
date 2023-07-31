@@ -10,9 +10,9 @@ import {
 import { ScrollView } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
-import MotField from "../../components/MotField";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../../../firebase";
+import MotField from "../../components/MotField";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,

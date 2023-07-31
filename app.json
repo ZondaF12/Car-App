@@ -12,7 +12,7 @@
         ],
         "name": "My Pocket Garage",
         "slug": "my-car-app",
-        "version": "1.1.14",
+        "version": "1.2.2",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -25,7 +25,7 @@
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.zondaf12.mycarapp",
-            "buildNumber": "29",
+            "buildNumber": "33",
             "usesAppleSignIn": true,
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Face ID is used to authenticate the user"

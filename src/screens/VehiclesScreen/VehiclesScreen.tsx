@@ -3,8 +3,6 @@ import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     collection,
-    doc,
-    getDoc,
     getDocs,
     onSnapshot,
     orderBy,
@@ -23,6 +21,10 @@ import {
     View,
 } from "react-native";
 import CountryFlag from "react-native-country-flag";
+import {
+    TestIds,
+    useRewardedInterstitialAd,
+} from "react-native-google-mobile-ads";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SwitchSelector, {
     ISwitchSelectorOption,
@@ -32,6 +34,7 @@ import ProfilePictureCircle from "../../components/ProfilePictureCircle";
 import VehicleInfo from "../../components/VehicleInfo";
 import VehicleInfoFleet from "../../components/VehicleInfoFleet";
 import { useAuth } from "../../contexts/AuthContext";
+import useRevenueCat from "../../hooks/useRevenueCat";
 import addNewVehicle from "../../tools/addNewVehicle";
 import refreshVehicleDetails from "../../tools/refreshVehicleDetails";
 import { RootStackParamList } from "../../types/rootStackParamList";
@@ -48,10 +51,37 @@ const VehiclesScreen = ({ navigation }: any) => {
     const [refreshing, setRefreshing] = useState(false);
     const [userVehiclesLoaded, setUserVehiclesLoaded] = useState(false);
     const [userName, setUserName] = useState("");
+    const [newVehicle, setNewVehicle] = useState("");
     const [vehicleView, setVehicleView] = useState<
         string | number | ISwitchSelectorOption
     >("default");
     const { getUser, getUserName, user } = useAuth();
+    const { isProMember } = useRevenueCat();
+
+    const { isLoaded, isEarnedReward, load, show, isClosed } =
+        useRewardedInterstitialAd(TestIds.REWARDED_INTERSTITIAL, {
+            requestNonPersonalizedAdsOnly: true,
+        });
+
+    useEffect(() => {
+        load();
+    }, [load, isClosed]);
+
+    useEffect(() => {
+        const newVehicleAdded = async () => {
+            setIsLoading(true);
+            setModalVisible(false);
+
+            await addNewVehicle(newVehicle);
+
+            await checkUserVehicles();
+            setIsLoading(false);
+        };
+
+        if (isEarnedReward) {
+            newVehicleAdded();
+        }
+    }, [isEarnedReward, navigation]);
 
     const checkUserVehicles = async () => {
         const curUser = auth.currentUser!;
@@ -126,15 +156,13 @@ const VehiclesScreen = ({ navigation }: any) => {
     }, [userVehiclesLoaded]);
 
     const onAddNewVehicle = async (numberPlate: string) => {
-        // if (!isProMember) {
-        //     if (userVehicles.length >= 2) {
-        //         Alert.alert(
-        //             "Please Upgrade to PRO to add more than 2 vehicles to your garage"
-        //         );
-        //         setModalVisible(false);
-        //         return;
-        //     }
-        // }
+        if (isLoaded && !isProMember) {
+            if (userVehicles.length >= 2) {
+                setNewVehicle(numberPlate);
+                show();
+                return;
+            }
+        }
         setIsLoading(true);
         setModalVisible(false);
 
@@ -261,7 +289,7 @@ const VehiclesScreen = ({ navigation }: any) => {
                             <Text className="text-white text-xl">
                                 {userName}
                             </Text>
-                            {/* {isProMember ? (
+                            {isProMember ? (
                                 <AntDesign
                                     name="star"
                                     size={18}
@@ -269,7 +297,7 @@ const VehiclesScreen = ({ navigation }: any) => {
                                 />
                             ) : (
                                 ""
-                            )} */}
+                            )}
                         </View>
                         <View className="pt-2 space-y-0.5">
                             <View className="flex-row items-center space-x-1">

@@ -1,8 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { auth, database, functions } from "../../firebase";
 import schedulePushNotification from "./notifications/scheduleNotification";
-import { httpsCallable } from "firebase/functions";
 
 const refreshVehicleDetails = async (userVehicles: any) => {
     for (let vehicle in userVehicles) {

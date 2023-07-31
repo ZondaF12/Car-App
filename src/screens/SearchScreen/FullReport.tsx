@@ -1,8 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { doc, getDoc } from "firebase/firestore";
 import React from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { database } from "../../../firebase";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import FullCheckList from "../../components/FullCheckList";
 import { useAuth } from "../../contexts/AuthContext";
 import { RootStackParamList } from "../../types/rootStackParamList";
@@ -17,37 +15,36 @@ const FullReport = ({ route }: any) => {
     const { getUser } = useAuth();
 
     const handlePurchaseReport = async () => {
-        const curUser = await getUser();
-        const purchaseQuery = doc(
-            database,
-            "users",
-            curUser.uid,
-            "purchases",
-            numberPlate
-        );
-        const vehicleCheck = await getDoc(purchaseQuery);
-        const userVehicleData = vehicleCheck.data();
-
-        if (userVehicleData) {
-            console.log("Already Purchased");
-            Alert.alert(
-                "Report Already Purchased",
-                `Are you sure you want to purchase a report for this vehicle again?`,
-                [
-                    {
-                        text: "Cancel",
-                        style: "cancel",
-                    },
-                    {
-                        text: "Purchase",
-                        style: "default",
-                        onPress: () => purchaseReport(),
-                    },
-                ]
-            );
-        } else {
-            await purchaseReport();
-        }
+        // const curUser = await getUser();
+        // const purchaseQuery = doc(
+        //     database,
+        //     "users",
+        //     curUser.uid,
+        //     "purchases",
+        //     numberPlate
+        // );
+        // const vehicleCheck = await getDoc(purchaseQuery);
+        // const userVehicleData = vehicleCheck.data();
+        // if (userVehicleData) {
+        //     console.log("Already Purchased");
+        //     Alert.alert(
+        //         "Report Already Purchased",
+        //         `Are you sure you want to purchase a report for this vehicle again?`,
+        //         [
+        //             {
+        //                 text: "Cancel",
+        //                 style: "cancel",
+        //             },
+        //             {
+        //                 text: "Purchase",
+        //                 style: "default",
+        //                 onPress: () => purchaseReport(),
+        //             },
+        //         ]
+        //     );
+        // } else {
+        //     await purchaseReport();
+        // }
     };
 
     const purchaseReport = async () => {
@@ -88,7 +85,7 @@ const FullReport = ({ route }: any) => {
                         onPress={handlePurchaseReport}
                     >
                         <Text className="text-white font-bold">
-                            Purchase Report
+                            Coming Soon
                         </Text>
                     </TouchableOpacity>
                 </View>

@@ -25,6 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, database } from "../../../firebase";
 import SearchHistory from "../../components/SearchHistory";
 import { useAuth } from "../../contexts/AuthContext";
+import useRevenueCat from "../../hooks/useRevenueCat";
 import { RootStackParamList } from "../../types/rootStackParamList";
 
 export type NavigationProp = NativeStackNavigationProp<
@@ -45,15 +46,13 @@ const SearchScreen = ({ navigation }: any) => {
     const [searchPlate, setSearchPlate] = useState("");
     const { getUser } = useAuth();
 
+    const { isProMember } = useRevenueCat();
+
     const { isLoaded, isClosed, load, show } = useInterstitialAd(
-        TestIds.INTERSTITIAL,
-        {
-            requestNonPersonalizedAdsOnly: true,
-        }
+        TestIds.INTERSTITIAL
     );
 
     useEffect(() => {
-        // Start loading the interstitial straight away
         load();
     }, [load]);
 
@@ -67,22 +66,6 @@ const SearchScreen = ({ navigation }: any) => {
             });
         }
     }, [isClosed, navigation]);
-
-    // const checkSearchHistory = async () => {
-    //     const curUser = await getUser();
-    //     const searchHistoryQuery = await getDocs(
-    //         query(
-    //             collection(database, "users", curUser?.uid, "searchHistory"),
-    //             orderBy("createdAt", "desc")
-    //         )
-    //     );
-
-    //     searchHistoryQuery.forEach((QueryDocumentSnapshot) => {
-    //         setSearchHistory((searchHistory: any) =>
-    //             searchHistory.concat(QueryDocumentSnapshot.data())
-    //         );
-    //     });
-    // };
 
     useEffect(() => {
         setSearchPlate("");
@@ -183,7 +166,7 @@ const SearchScreen = ({ navigation }: any) => {
                         style={{ fontSize: 18 }}
                         autoCapitalize={"characters"}
                         onSubmitEditing={(event) => {
-                            if (isLoaded) {
+                            if (isLoaded && !isProMember) {
                                 show();
                             } else {
                                 navigation.navigate("VehicleCheck", {
@@ -232,12 +215,29 @@ const SearchScreen = ({ navigation }: any) => {
                 >
                     {searchHistory.length > 0 ? (
                         searchHistory.map((vehicle: any) => (
-                            <SearchHistory
-                                numberPlate={vehicle.numberPlate}
-                                carModel={vehicle.make}
-                                regYear={vehicle.yearOfManufacture}
-                                date={vehicle.createdAt}
-                            />
+                            <TouchableOpacity
+                                onPress={(event) => {
+                                    if (isLoaded && !isProMember) {
+                                        setSearchPlate(vehicle.numberPlate);
+                                        show();
+                                    } else {
+                                        navigation.navigate("VehicleCheck", {
+                                            screen: "VehicleCheck",
+                                            params: {
+                                                numberPlate:
+                                                    vehicle.numberPlate,
+                                            },
+                                        });
+                                    }
+                                }}
+                            >
+                                <SearchHistory
+                                    numberPlate={vehicle.numberPlate}
+                                    carModel={vehicle.make}
+                                    regYear={vehicle.yearOfManufacture}
+                                    date={vehicle.createdAt}
+                                />
+                            </TouchableOpacity>
                         ))
                     ) : (
                         <Text className="text-white p-8 text-base">

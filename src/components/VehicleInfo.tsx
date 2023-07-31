@@ -1,8 +1,9 @@
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
 import MotSvgComponent from "../../assets/MotSvg";
+import TaxSvgComponent from "../../assets/TaxSvg";
 
 type Props = {
     numberPlate: string;
@@ -92,15 +93,11 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={motPercent >= 83 ? "#ff754c" : "#fff"}
+                    color={motPercent >= 83.562 ? "#ff754c" : "#26fc90"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
-                    <MotSvgComponent
-                        color={motPercent >= 83 ? "#ff754c" : "#fff"}
-                        height={24}
-                        width={24}
-                    />
+                    <MotSvgComponent color={"#fff"} height={24} width={24} />
                 </ProgressCircle>
                 <ProgressCircle
                     percent={
@@ -108,15 +105,11 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={taxPercent >= 83 ? "#ff754c" : "#fff"}
+                    color={taxPercent >= 83.562 ? "#ff754c" : "#26fc90"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
-                    <Entypo
-                        name="shield"
-                        size={24}
-                        color={taxPercent >= 83 ? "#ff754c" : "#fff"}
-                    />
+                    <TaxSvgComponent color={"#fff"} height={28} width={28} />
                 </ProgressCircle>
                 <ProgressCircle
                     percent={
@@ -126,15 +119,11 @@ const VehicleInfo = ({
                     }
                     radius={25}
                     borderWidth={2}
-                    color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
+                    color={insurancePercent >= 83.562 ? "#ff754c" : "#26fc90"}
                     shadowColor="#707175"
                     bgColor="#242731"
                 >
-                    <MaterialIcons
-                        name="attach-money"
-                        size={24}
-                        color={insurancePercent >= 83 ? "#ff754c" : "#fff"}
-                    />
+                    <Entypo name="shield" size={24} color={"#fff"} />
                 </ProgressCircle>
             </View>
         </View>

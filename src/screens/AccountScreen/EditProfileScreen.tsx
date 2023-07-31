@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, database } from "../../../firebase";
+import { database } from "../../../firebase";
 import SettingsButton from "../../components/SettingsButton";
 import { useAuth } from "../../contexts/AuthContext";
 import { RootStackParamList } from "../../types/rootStackParamList";
