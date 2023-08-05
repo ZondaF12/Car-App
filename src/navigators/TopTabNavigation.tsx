@@ -1,17 +1,26 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { httpsCallable } from "firebase/functions";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Alert, View } from "react-native";
+import { functions } from "../../firebase";
 import FullReport from "../screens/SearchScreen/FullReport";
 import VehicleCheckScreen from "../screens/SearchScreen/VehicleCheckScreen";
 import VehicleMotScreen from "../screens/SearchScreen/VehicleMotScreen";
 import VehicleTaxScreen from "../screens/SearchScreen/VehicleTaxScreen";
 import { RootStackParamList } from "../types/rootStackParamList";
-import { functions } from "../../firebase";
-import { httpsCallable } from "firebase/functions";
 
 const TopTabs = createMaterialTopTabNavigator<RootStackParamList>();
 
+export type NavigationProp = NativeStackNavigationProp<
+    RootStackParamList,
+    "VehicleCheck"
+>;
+
 function MyTabs(props: any) {
+    const navigation = useNavigation<NavigationProp>();
+
     const [motStatus, setMotStatus] = useState("");
     const [motExpiry, setMotExpiry] = useState("");
 
@@ -28,6 +37,13 @@ function MyTabs(props: any) {
             const res = await getVehicleData({
                 numberPlate: props.numberPlate,
             });
+
+            if (res.data === "ERR_BAD_REQUEST") {
+                navigation.goBack();
+                Alert.alert(`${props.numberPlate} is not a valid number plate`);
+            }
+
+            console.log(res);
 
             await setStates(res.data);
         };

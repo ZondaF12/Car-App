@@ -145,7 +145,7 @@ const VehicleTaxScreen = ({ route }: any) => {
             </View>
             <Text className="text-white mt-4 text-xs text-left w-[90%] px-4 font-extralight">
                 {isNewTax
-                    ? "*As of March 2017, if your new car had a list price of £40,000 or more, you’ll pay additional rate tax, or premium car tax, which is £355, or £535 per year in total (£180 + £355). You’ll pay this rate for five years (from the second time the vehicle is taxed)."
+                    ? "*As of March 2017, if your new car had a list price of £40,000 or more, you’ll pay additional rate tax, or premium car tax, which is £390, or £570 per year in total (£180 + £390). You’ll pay this rate for five years (from the second time the vehicle is taxed)."
                     : ""}
             </Text>
         </ScrollView>

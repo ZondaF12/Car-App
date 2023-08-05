@@ -153,13 +153,13 @@ const AccountScreen = () => {
                         </TouchableOpacity>
                     )}
                 </View>
-                <View className="px-8 pt-8 pb-2">
+                {/* <View className="px-8 pt-8 pb-2">
                     <Text className="text-[#707175] text-lg">APP SETTINGS</Text>
                 </View>
                 <SettingsButton
                     label="Purchases"
                     onPress={handleShowUserPurchases}
-                />
+                /> */}
                 {/* <SettingsButton
                     label="Appearance"
                     onPress={() => appearanceBottomSheetRef?.current?.expand()}

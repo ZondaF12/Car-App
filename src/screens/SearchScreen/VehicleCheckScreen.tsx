@@ -1,12 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { httpsCallable } from "firebase/functions";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
+import { functions } from "../../../firebase";
 import TableFields from "../../components/TableFields";
 import addToSearchHistory from "../../tools/addToSearchHistory";
 import { RootStackParamList } from "../../types/rootStackParamList";
-import { functions } from "../../../firebase";
-import { httpsCallable } from "firebase/functions";
 
 export type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -20,26 +20,13 @@ const VehicleCheckScreen = ({ route }: any) => {
 
     useEffect(() => {
         const onGetVehicleDetails = async () => {
-            try {
-                const getVehicleData = httpsCallable(
-                    functions,
-                    "getVehicleData"
-                );
+            const getVehicleData = httpsCallable(functions, "getVehicleData");
 
-                const res = await getVehicleData({
-                    numberPlate: vehicleRegPlate,
-                });
+            const res: any = await getVehicleData({
+                numberPlate: vehicleRegPlate,
+            });
 
-                setVehicleDetails(res.data);
-            } catch (e: any) {
-                console.error(e);
-
-                navigation.goBack();
-                Alert.alert(
-                    `${vehicleRegPlate} is not a valid number plate`,
-                    e.message
-                );
-            }
+            setVehicleDetails(res.data);
         };
 
         onGetVehicleDetails();

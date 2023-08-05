@@ -20,9 +20,6 @@ import { onCall } from "firebase-functions/v2/https";
 exports.getVehicleData = onCall(
     { region: "europe-west2", maxInstances: 10 },
     async (request) => {
-        console.log(request);
-        console.log("FOO");
-
         const data = JSON.stringify({
             registrationNumber: request.data.numberPlate,
         });
@@ -36,8 +33,12 @@ exports.getVehicleData = onCall(
             data: data,
         };
 
-        const res = await axios(config);
-        return { ...res.data };
+        try {
+            const res = await axios(config);
+            return res.data;
+        } catch (error: any) {
+            return error.code;
+        }
     }
 );
 
@@ -53,7 +54,11 @@ exports.getMotDetails = onCall(
             },
         };
 
-        const res = await axios(config);
-        return { ...res.data };
+        try {
+            const res = await axios(config);
+            return res.data;
+        } catch (error: any) {
+            return error.code;
+        }
     }
 );

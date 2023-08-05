@@ -36,6 +36,7 @@
     "expo-status-bar": "~1.4.4",
     "expo-web-browser": "~12.1.1",
     "firebase": "^9.18.0",
+    "got": "^13.0.0",
     "javascript-time-ago": "^2.5.9",
     "moment": "^2.29.4",
     "nativewind": "^2.0.11",
