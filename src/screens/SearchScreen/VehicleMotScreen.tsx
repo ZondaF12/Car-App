@@ -33,12 +33,15 @@ const VehicleMotScreen = ({ route }: any) => {
                 numberPlate,
             });
 
+            console.log(res);
+
             setMotTests(res.data[0].motTests);
 
             if (!motExpiry) {
                 const newCarDate = new Date(
-                    res[0].motTestExpiryDate
+                    res.data[0].motTestExpiryDate
                 ).toDateString();
+
                 setCarMotDate(newCarDate);
             } else {
                 const motDate = new Date(motExpiry).toDateString();
@@ -87,7 +90,7 @@ const VehicleMotScreen = ({ route }: any) => {
         dateDifference();
     }, [carMotDate]);
 
-    if (!carMotDate) {
+    if (!carMotDate && !dayDifference) {
         return (
             <View className="bg-[#1e2128] flex-1 p-10 items-center justify-center">
                 <ActivityIndicator size="large" color="#6c5dd2" />
